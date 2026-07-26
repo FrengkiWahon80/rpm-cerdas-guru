@@ -8,16 +8,30 @@ import io
 def panggil_ai_guru(topik, cp, komponen_rpp, instruksi_khusus):
     api_key_ai = st.secrets.get("GEMINI_API_KEY", "")
     if not api_key_ai:
-        return "⚠️ Kunci API kosong. Mohon isi 'GEMINI_API_KEY' di menu Secrets Streamlit Cloud Anda."
+        return "⚠️ Kunci API kosong di menu Secrets Streamlit Anda."
     try:
         import requests, json
         url = "https://googleapis.com"
         headers = {'Content-Type': 'application/json'}
         params = {"key": str(api_key_ai).strip()}
         prompt = f"Topik: {topik}\nCP: {cp}\nKomponen: {komponen_rpp}\nInstruksi: {instruksi_khusus}"
-        payload = {"contents": [{"parts": [{"text": prompt}]}]}
+        
+        # Perbaikan struktur JSON resmi sesuai aturan Google Gemini
+        payload = {
+            "contents": [{
+                "parts": [{"text": prompt}]
+            }]
+        }
         response = requests.post(url, params=params, headers=headers, json=payload)
-        return response.json()['candidates']['content']['parts']['text']
+        res_json = response.json()
+        
+        # Keamanan pembacaan JSON agar tidak memicu eror line 1 column 1
+        if 'candidates' in res_json:
+            return res_json['candidates'][0]['content']['parts'][0]['text']
+        elif 'error' in res_json:
+            return f"⚠️ Eror dari Google: {res_json['error']['message']}"
+        else:
+            return "⚠️ Balasan Google tidak sesuai format. Sila coba klik tombol sekali lagi."
     except Exception as e:
         return f"⚠️ Gagal memuat AI otomatis. (Detail: {str(e)})"
 
@@ -42,19 +56,21 @@ def buat_dokumen_rpm(data):
         ("Capaian Pembelajaran (CP)", data.get('cp', ''))
     ]
     for i, (l, v) in enumerate(lbls):
-        ti.rows[i].cells.text = str(l)
-        ti.rows[i].cells.text = str(v)
-        ti.rows[i].cells.paragraphs.runs.font.bold = True
+        ti.rows[i].cells[0].text = str(l)
+        ti.rows[i].cells[1].text = str(v)
+        ti.rows[i].cells[0].paragraphs[0].runs[0].font.bold = True
     doc.add_paragraph()
     
     doc.add_heading("II. KOMPONEN INTI RPM MENDALAM", level=2)
     t_inti = doc.add_table(rows=9, cols=2); t_inti.style = 'Table Grid'
-    t_inti.rows.cells.text = 'Komponen RPM'
-    t_inti.rows.cells.text = 'Deskripsi / Detail Rencana Kerja (Hasil AI & Guru)'
-    t_inti.rows.cells.paragraphs.runs.font.bold = True
-    t_inti.rows.cells.paragraphs.runs.font.bold = True
-    t_inti.rows.cells._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
-    t_inti.rows.cells._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
+    
+    # Perbaikan mutlak: Membaca teks header kolom 0 dan kolom 1 secara individual
+    t_inti.rows[0].cells[0].text = 'Komponen RPM'
+    t_inti.rows[0].cells[1].text = 'Deskripsi / Detail Rencana Kerja'
+    t_inti.rows[0].cells[0].paragraphs[0].runs[0].font.bold = True
+    t_inti.rows[0].cells[1].paragraphs[0].runs[0].font.bold = True
+    t_inti.rows[0].cells[0]._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
+    t_inti.rows[0].cells[1]._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
     
     k_data = [
         ("1. Dimensi Profil Lulusan", data.get('dimensi_profil', '')),
@@ -67,17 +83,21 @@ def buat_dokumen_rpm(data):
         ("8. Asesmen & Lembar Kerja", data.get('asesmen_total', ''))
     ]
     for i, (k, isi) in enumerate(k_data):
-        t_inti.rows[i+1].cells.text = str(k)
-        t_inti.rows[i+1].cells.text = str(isi)
-        t_inti.rows[i+1].cells.paragraphs.runs.font.bold = True
+        t_inti.rows[i+1].cells[0].text = str(k)
+        t_inti.rows[i+1].cells[1].text = str(isi)
+        t_inti.rows[i+1].cells[0].paragraphs[0].runs[0].font.bold = True
     doc.add_paragraph(); doc.add_paragraph()
     
     doc.add_heading("III. PENGESAHAN", level=2)
     ttd = doc.add_table(rows=1, cols=2)
-    for cell in ttd.rows.cells:
+    
+    # Perbaikan mutlak: Menghapus garis tepi khusus untuk area tanda tangan resmi
+    for cell in ttd.rows[0].cells:
         cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:tcBorders {}><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders>'.format(nsdecls('w'))))
-    ttd.rows.cells.paragraphs.text = f"Mengetahui,\nKepala Sekolah {data.get('sekolah', '')}\n\n\n\n\n( _______________________ )"
-    ttd.rows.cells.paragraphs.text = f"Guru Mata Pelajaran,\n\n\n\n\n\n( {data.get('guru', '')} )"
+    
+    # Pengisian teks tanda tangan secara terpisah kolom kiri (0) dan kolom kanan (1)
+    ttd.rows[0].cells[0].paragraphs[0].text = f"Mengetahui,\nKepala Sekolah {data.get('sekolah', '')}\n\n\n\n\n( _______________________ )"
+    ttd.rows[0].cells[1].paragraphs[0].text = f"Guru Mata Pelajaran,\n\n\n\n\n\n( {data.get('guru', '')} )"
     
     stream = io.BytesIO(); doc.save(stream); stream.seek(0)
     return stream
@@ -124,7 +144,7 @@ dimensi_profil = st.text_area("1. Dimensi Profil Lulusan", st.session_state.prof
 tujuan_pembelajaran = st.text_area("2. Tujuan Pembelajaran", st.session_state.tujuan_ai if st.session_state.tujuan_ai else "Klik tombol AI di atas", height=100)
 praktik_pedagogis = st.text_area("3. Praktik Pedagogis", "Menggunakan pendekatan Problem-Based Learning (PBL) berbasis penyelidikan kasus nyata secara berkelompok.")
 lingkungan_belajar = st.text_area("4. Lingkungan Pembelajaran", "Fisik: Susunan meja berkelompok. Budaya: Saling menghargai argumen, ramah kesalahan, refleksi terbuka.")
-kemitraan_belajar = st.text_area("5. Kemitraan Pembelajaran", "Kolaborasi aktif antar peserta didik, guru sebagai fasilitator, dan pemanfaatan gawai cerdas.")
+kemitraan_belajar = st.text_area("5. Kemitraan Pembelajaran", "Kolaborasi aktif antar peserta didik, guru sebagai fasilitator, dan didukung gawai cerdas.")
 pemanfaatan_digital = st.text_area("6. Pemanfaatan Digital", "Platform kolaborasi online untuk pengerjaan tugas kelompok secara real-time.")
 langkah_pembelajaran = st.text_area("7. Langkah Pembelajaran Rinci", st.session_state.langkah_ai if st.session_state.langkah_ai else "Klik tombol AI di atas", height=150)
 asesmen_total = st.text_area("8. Asesmen Pembelajaran & LKM", st.session_state.asesmen_ai if st.session_state.asesmen_ai else "Klik tombol AI di atas", height=150)
