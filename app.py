@@ -595,3 +595,77 @@ Peserta didik memiliki kemampuan yang beragam.
 Guru menerapkan pembelajaran berdiferensiasi
 sesuai kebutuhan belajar peserta didik.
 """.strip()
+import streamlit as st
+
+from modules.generator import (
+    generate_tujuan,
+    generate_pemahaman,
+    generate_pemantik,
+    generate_profil,
+    generate_deep_learning,
+    generate_sarana,
+    generate_karakteristik
+)
+
+st.title("🎯 Generator Tujuan Pembelajaran")
+
+st.write(
+    "Klik tombol di bawah untuk membuat rancangan awal secara otomatis."
+)
+
+if st.button("🚀 Generate Tujuan", use_container_width=True):
+
+    tujuan = generate_tujuan(
+        st.session_state.get("mapel", ""),
+        st.session_state.get("topik", ""),
+        st.session_state.get("kelas", "")
+    )
+
+    pemahaman = generate_pemahaman(
+        st.session_state.get("topik", "")
+    )
+
+    pemantik = generate_pemantik(
+        st.session_state.get("topik", "")
+    )
+
+    profil = generate_profil(
+        st.session_state.get("profil", [])
+    )
+
+    deep = generate_deep_learning(
+        st.session_state.get("topik", "")
+    )
+
+    sarana = generate_sarana()
+
+    karakteristik = generate_karakteristik()
+
+    st.session_state["tujuan"] = tujuan
+    st.session_state["pemahaman"] = pemahaman
+    st.session_state["pemantik"] = pemantik
+    st.session_state["profil_hasil"] = profil
+    st.session_state["deep"] = deep
+    st.session_state["sarana"] = sarana
+    st.session_state["karakteristik"] = karakteristik
+
+st.subheader("1. Tujuan Pembelajaran")
+st.text_area("", st.session_state.get("tujuan", ""), height=120)
+
+st.subheader("2. Pemahaman Bermakna")
+st.text_area("", st.session_state.get("pemahaman", ""), height=100)
+
+st.subheader("3. Pertanyaan Pemantik")
+st.text_area("", st.session_state.get("pemantik", ""), height=120)
+
+st.subheader("4. Profil Lulusan")
+st.text_area("", st.session_state.get("profil_hasil", ""), height=120)
+
+st.subheader("5. Pembelajaran Mendalam")
+st.text_area("", st.session_state.get("deep", ""), height=140)
+
+st.subheader("6. Sarana dan Prasarana")
+st.text_area("", st.session_state.get("sarana", ""), height=120)
+
+st.subheader("7. Karakteristik Peserta Didik")
+st.text_area("", st.session_state.get("karakteristik", ""), height=120)
