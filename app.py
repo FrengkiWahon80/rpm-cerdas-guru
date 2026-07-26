@@ -1,834 +1,424 @@
-# ==========================================================
-# RPM CERDAS AI v1.0
-# Generator Rencana Pembelajaran Mendalam
-# Jenjang : SMP
-# Kurikulum : Merdeka
-# Bahasa : Indonesia
-# ==========================================================
+# ============================================================
+# RPM CERDAS AI
+# Generator RPP Kurikulum Merdeka
+# Versi Sederhana
+# Bahasa Indonesia
+# ============================================================
 
 import streamlit as st
-from datetime import datetime
+from docx import Document
+import io
 
-# ----------------------------------------------------------
+# ------------------------------------------------------------
 # KONFIGURASI HALAMAN
-# ----------------------------------------------------------
+# ------------------------------------------------------------
 
 st.set_page_config(
     page_title="RPM CERDAS AI",
     page_icon="📘",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
 
-# ----------------------------------------------------------
-# CSS
-# ----------------------------------------------------------
+# ------------------------------------------------------------
+# CSS SEDERHANA
+# ------------------------------------------------------------
 
 st.markdown("""
 <style>
 
-.block-container{
-    padding-top:1rem;
-}
-
 .main-title{
-    font-size:34px;
-    font-weight:bold;
-    color:#1565C0;
+font-size:34px;
+font-weight:bold;
+color:#1565C0;
 }
 
 .sub-title{
-    font-size:18px;
-    color:#555;
+font-size:18px;
+color:#555555;
 }
 
-.card{
-    background:#F8F9FA;
-    border-radius:12px;
-    padding:20px;
-    border:1px solid #DDDDDD;
-}
-
-.footer{
-    text-align:center;
-    color:gray;
-    margin-top:50px;
+.block-container{
+padding-top:1rem;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ----------------------------------------------------------
-# SESSION STATE
-# ----------------------------------------------------------
-
-default_data = {
-
-    "sekolah":"",
-    "guru":"",
-    "nip":"",
-    "mapel":"",
-    "kelas":"",
-    "fase":"",
-    "semester":"",
-    "tahun":"",
-    "materi":"",
-    "topik":"",
-    "cp":""
-
-}
-
-for key,value in default_data.items():
-
-    if key not in st.session_state:
-
-        st.session_state[key]=value
-
-# ----------------------------------------------------------
-# SIDEBAR
-# ----------------------------------------------------------
-
-with st.sidebar:
-
-    st.image(
-        "https://img.icons8.com/color/96/books.png",
-        width=80
-    )
-
-    st.title("RPM CERDAS AI")
-
-    st.caption("Versi Lokal 1.0")
-
-    st.divider()
-
-    menu = st.radio(
-
-        "Menu",
-
-        [
-
-            "🏠 Dashboard",
-
-            "📋 Identitas",
-
-            "🎯 Tujuan",
-
-            "📚 Langkah",
-
-            "📝 Asesmen",
-
-            "📄 LKPD",
-
-            "📊 Rubrik",
-
-            "⬇ Export Word"
-
-        ]
-
-    )
-
-    st.divider()
-
-    st.success("Jenjang : SMP")
-
-    st.info("Kurikulum Merdeka")
-
-    st.caption("Versi Offline")
-
-# ----------------------------------------------------------
-# DASHBOARD
-# ----------------------------------------------------------
-
-if menu=="🏠 Dashboard":
-
-    st.markdown(
-        '<div class="main-title">📘 RPM CERDAS AI</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        '<div class="sub-title">Generator Rencana Pembelajaran Mendalam</div>',
-        unsafe_allow_html=True
-    )
-
-    st.divider()
-
-    col1,col2,col3,col4 = st.columns(4)
-
-    with col1:
-        st.metric("Jenjang","SMP")
-
-    with col2:
-        st.metric("Kurikulum","Merdeka")
-
-    with col3:
-        st.metric("Versi","1.0")
-
-    with col4:
-        st.metric(
-            "Tahun",
-            datetime.now().year
-        )
-
-    st.write("")
-
-    st.markdown("""
-### Selamat Datang
-
-RPM CERDAS AI membantu guru menyusun perangkat pembelajaran secara lebih cepat.
-
-Aplikasi ini akan menghasilkan:
-
-- Tujuan Pembelajaran
-- Langkah Pembelajaran
-- Pembelajaran Mendalam
-- Asesmen Diagnostik
-- Asesmen Formatif
-- Asesmen Sumatif
-- LKPD
-- Rubrik Penilaian
-- Pengayaan
-- Remedial
-- Refleksi
-- Dokumen Word siap cetak
-""")
-
-    st.info(
-        "Silakan pilih menu **Identitas** pada sidebar untuk mulai membuat perangkat pembelajaran."
-    )
-
-# ----------------------------------------------------------
-# HALAMAN BELUM DIBUAT
-# ----------------------------------------------------------
-
-else:
-
-    st.warning(
-        "Halaman ini akan dibuat pada file berikutnya."
-    )
-
-# ----------------------------------------------------------
-# FOOTER
-# ----------------------------------------------------------
-
-st.divider()
+# ------------------------------------------------------------
+# JUDUL
+# ------------------------------------------------------------
 
 st.markdown(
-"""
-<div class="footer">
-
-RPM CERDAS AI v1.0<br>
-
-Dikembangkan menggunakan Python + Streamlit
-
-</div>
-""",
+'<div class="main-title">📘 RPM CERDAS AI</div>',
 unsafe_allow_html=True
 )
-# ==========================================================
-# HALAMAN IDENTITAS
-# RPM CERDAS AI
-# ==========================================================
 
-import streamlit as st
-
-st.set_page_config(page_title="Identitas", page_icon="📋", layout="wide")
-
-st.title("📋 Identitas Pembelajaran")
-
-st.markdown("Lengkapi identitas perangkat pembelajaran terlebih dahulu.")
+st.markdown(
+'<div class="sub-title">Generator Rencana Pelaksanaan Pembelajaran (RPP) Kurikulum Merdeka</div>',
+unsafe_allow_html=True
+)
 
 st.divider()
 
-# ==========================================================
-# IDENTITAS SEKOLAH
-# ==========================================================
+# ============================================================
+# IDENTITAS
+# ============================================================
 
-st.subheader("🏫 Identitas Sekolah")
+st.header("📋 Identitas Pembelajaran")
 
-col1, col2 = st.columns(2)
+col1,col2=st.columns(2)
 
 with col1:
 
-    sekolah = st.text_input(
+    sekolah=st.text_input(
         "Nama Sekolah",
-        value=st.session_state.get("sekolah", "")
+        "SMP Negeri 1 Indonesia"
     )
 
-    guru = st.text_input(
+    guru=st.text_input(
         "Nama Guru",
-        value=st.session_state.get("guru", "")
+        ""
     )
 
-    nip = st.text_input(
-        "NIP",
-        value=st.session_state.get("nip", "")
-    )
+    mapel=st.selectbox(
 
-    mapel = st.selectbox(
         "Mata Pelajaran",
+
         [
-            "Pendidikan Agama",
-            "PPKn",
-            "Bahasa Indonesia",
-            "Matematika",
-            "IPA",
-            "IPS",
-            "Bahasa Inggris",
-            "Seni Budaya",
-            "PJOK",
-            "Informatika",
-            "Prakarya"
+
+        "Pendidikan Agama",
+
+        "PPKn",
+
+        "Bahasa Indonesia",
+
+        "Matematika",
+
+        "IPA",
+
+        "IPS",
+
+        "Bahasa Inggris",
+
+        "Seni Budaya",
+
+        "PJOK",
+
+        "Informatika",
+
+        "Prakarya"
+
         ]
+
+    )
+
+    kelas=st.selectbox(
+
+        "Kelas",
+
+        [
+
+        "VII",
+
+        "VIII",
+
+        "IX"
+
+        ]
+
     )
 
 with col2:
 
-    kelas = st.selectbox(
-        "Kelas",
-        ["VII", "VIII", "IX"]
-    )
+    semester=st.selectbox(
 
-    fase = st.selectbox(
-        "Fase",
-        ["D"]
-    )
-
-    semester = st.selectbox(
         "Semester",
-        ["Ganjil", "Genap"]
+
+        [
+
+        "Ganjil",
+
+        "Genap"
+
+        ]
+
     )
 
-    tahun = st.text_input(
+    tahun=st.text_input(
+
         "Tahun Pelajaran",
-        value="2026/2027"
+
+        "2026/2027"
+
     )
 
-# ==========================================================
-# PEMBELAJARAN
-# ==========================================================
+    alokasi=st.text_input(
 
-st.divider()
+        "Alokasi Waktu",
 
-st.subheader("📖 Informasi Pembelajaran")
+        "2 x 40 Menit"
 
-materi = st.text_input(
-    "Materi Pokok"
-)
+    )
 
-topik = st.text_input(
-    "Topik Pembelajaran"
-)
+    model=st.selectbox(
 
-alokasi = st.text_input(
-    "Alokasi Waktu",
-    value="2 x 40 Menit"
-)
-
-cp = st.text_area(
-    "Capaian Pembelajaran (CP)",
-    height=150
-)
-
-# ==========================================================
-# MODEL PEMBELAJARAN
-# ==========================================================
-
-st.divider()
-
-st.subheader("🎯 Strategi Pembelajaran")
-
-col3, col4 = st.columns(2)
-
-with col3:
-
-    model = st.selectbox(
         "Model Pembelajaran",
+
         [
-            "Problem Based Learning",
-            "Project Based Learning",
-            "Discovery Learning",
-            "Inquiry Learning",
-            "Cooperative Learning",
-            "Problem Solving",
-            "Contextual Teaching Learning",
-            "Role Playing"
+
+        "Problem Based Learning",
+
+        "Project Based Learning",
+
+        "Discovery Learning",
+
+        "Inquiry Learning",
+
+        "Cooperative Learning"
+
         ]
+
     )
 
-    pendekatan = st.selectbox(
-        "Pendekatan",
-        [
-            "Deep Learning",
-            "Saintifik",
-            "Teaching at The Right Level",
-            "Konstruktivistik"
-        ]
-    )
-
-with col4:
-
-    metode = st.multiselect(
-        "Metode Pembelajaran",
-        [
-            "Diskusi",
-            "Ceramah",
-            "Presentasi",
-            "Tanya Jawab",
-            "Penugasan",
-            "Observasi",
-            "Eksperimen",
-            "Studi Kasus"
-        ],
-        default=["Diskusi", "Presentasi"]
-    )
-
-    media = st.text_input(
-        "Media Pembelajaran",
-        value="LCD, Laptop, LKPD"
-    )
-
-# ==========================================================
-# SUMBER BELAJAR
-# ==========================================================
+# ============================================================
+# TOPIK DAN CAPAIAN
+# ============================================================
 
 st.divider()
 
-st.subheader("📚 Sumber Belajar")
+st.header("📖 Materi Pembelajaran")
 
-sumber = st.text_area(
-    "Sumber Belajar",
-    value="""1. Buku Guru
-2. Buku Siswa
-3. Internet
-4. Lingkungan Sekitar"""
+topik=st.text_input(
+
+    "Topik / Materi",
+
+    ""
+
 )
 
-# ==========================================================
-# PROFIL LULUSAN
-# ==========================================================
+cp=st.text_area(
+
+    "Capaian Pembelajaran",
+
+    height=150
+
+)
+
+tujuan_manual=st.text_area(
+
+    "Tujuan Pembelajaran (Opsional)",
+
+    help="Kosongkan jika ingin dibuat otomatis oleh AI.",
+
+    height=120
+
+)
+
+# ============================================================
+# TOMBOL GENERATOR
+# ============================================================
 
 st.divider()
 
-st.subheader("🌟 Profil Lulusan")
+generate=st.button(
 
-profil = st.multiselect(
-    "Pilih Dimensi Profil Lulusan",
-    [
-        "Keimanan dan Ketakwaan terhadap Tuhan YME",
-        "Kewargaan",
-        "Penalaran Kritis",
-        "Kreativitas",
-        "Kolaborasi",
-        "Komunikasi",
-        "Kesehatan"
-    ],
-    default=["Penalaran Kritis"]
+    "🚀 GENERATE RPP",
+
+    use_container_width=True
+
 )
 
-# ==========================================================
-# UPLOAD
-# ==========================================================
+# ============================================================
+# FUNGSI AI LOKAL
+# (Bagian 2 akan melanjutkan dari sini)
+# ============================================================# ============================================================
+# GENERATOR AI LOKAL
+# ============================================================
 
-st.divider()
-
-st.subheader("🖼 Upload Dokumen")
-
-logo = st.file_uploader(
-    "Logo Sekolah",
-    type=["png", "jpg", "jpeg"]
-)
-
-ttd_guru = st.file_uploader(
-    "Tanda Tangan Guru",
-    type=["png", "jpg"]
-)
-
-ttd_kepsek = st.file_uploader(
-    "Tanda Tangan Kepala Sekolah",
-    type=["png", "jpg"]
-)
-
-# ==========================================================
-# SIMPAN SESSION
-# ==========================================================
-
-if st.button("💾 Simpan Identitas", use_container_width=True):
-
-    st.session_state["sekolah"] = sekolah
-    st.session_state["guru"] = guru
-    st.session_state["nip"] = nip
-    st.session_state["mapel"] = mapel
-    st.session_state["kelas"] = kelas
-    st.session_state["fase"] = fase
-    st.session_state["semester"] = semester
-    st.session_state["tahun"] = tahun
-    st.session_state["materi"] = materi
-    st.session_state["topik"] = topik
-    st.session_state["alokasi"] = alokasi
-    st.session_state["cp"] = cp
-    st.session_state["model"] = model
-    st.session_state["pendekatan"] = pendekatan
-    st.session_state["metode"] = metode
-    st.session_state["media"] = media
-    st.session_state["sumber"] = sumber
-    st.session_state["profil"] = profil
-
-    st.success("✅ Identitas berhasil disimpan.")
-"""
-=========================================================
-GENERATOR RPM CERDAS AI
-Versi Lokal
-=========================================================
-"""
-
-# =========================================================
-# TUJUAN PEMBELAJARAN
-# =========================================================
-
-def generate_tujuan(mapel, topik, kelas):
-
-    tujuan = f"""
-Peserta didik kelas {kelas} mampu memahami konsep {topik}
-pada mata pelajaran {mapel},
-menunjukkan sikap kritis,
-mampu bekerja sama,
-mengkomunikasikan hasil belajar,
-serta menerapkan pengetahuan dalam kehidupan sehari-hari.
-"""
-
-    return tujuan.strip()
-
-
-# =========================================================
-# PEMAHAMAN BERMAKNA
-# =========================================================
-
-def generate_pemahaman(topik):
+def buat_dimensi(topik):
 
     return f"""
-Peserta didik memahami bahwa {topik}
-berkaitan erat dengan kehidupan sehari-hari,
-sehingga dapat diterapkan secara bertanggung jawab.
-""".strip()
+• Beriman, bertakwa kepada Tuhan Yang Maha Esa, dan berakhlak mulia melalui penghayatan nilai-nilai dalam materi "{topik}".
+
+• Bernalar kritis dengan menganalisis fakta, konsep, dan permasalahan yang berkaitan dengan materi.
+
+• Kreatif dalam menyampaikan ide dan solusi terhadap permasalahan yang dipelajari.
+
+• Bergotong royong melalui diskusi dan kerja kelompok.
+"""
 
 
-# =========================================================
-# PERTANYAAN PEMANTIK
-# =========================================================
+def buat_tujuan(topik, mapel, kelas, tujuan_manual):
 
-def generate_pemantik(topik):
-
-    return f"""
-1. Apa yang kamu ketahui tentang {topik}?
-
-2. Mengapa {topik} penting dipelajari?
-
-3. Bagaimana penerapan {topik} dalam kehidupan sehari-hari?
-""".strip()
-
-
-# =========================================================
-# PROFIL LULUSAN
-# =========================================================
-
-def generate_profil(profil):
-
-    hasil = []
-
-    for item in profil:
-
-        hasil.append(
-            f"• Peserta didik menunjukkan dimensi {item} selama proses pembelajaran."
-        )
-
-    return "\n".join(hasil)
-
-
-# =========================================================
-# PEMBELAJARAN MENDALAM
-# =========================================================
-
-def generate_deep_learning(topik):
+    if tujuan_manual.strip() != "":
+        return tujuan_manual
 
     return f"""
-Pembelajaran dirancang agar peserta didik tidak hanya mengetahui konsep
-{topik}, tetapi mampu menganalisis,
-mengevaluasi,
-mengaitkan dengan pengalaman nyata,
-serta menghasilkan solusi terhadap berbagai persoalan kontekstual.
-""".strip()
+Setelah mengikuti pembelajaran, peserta didik kelas {kelas} pada mata pelajaran {mapel} diharapkan mampu:
+
+1. Memahami konsep {topik} secara benar.
+
+2. Menganalisis keterkaitan materi dengan kehidupan sehari-hari.
+
+3. Menunjukkan sikap bertanggung jawab, jujur, dan mampu bekerja sama.
+
+4. Menyajikan hasil diskusi secara percaya diri.
+
+5. Merefleksikan manfaat materi dalam kehidupan nyata.
+
+Pembelajaran dirancang agar berkesadaran, bermakna, dan menggembirakan.
+"""
 
 
-# =========================================================
-# SARANA
-# =========================================================
+def buat_pedagogis(model):
 
-def generate_sarana():
+    return f"""
+Pembelajaran menggunakan model **{model}** yang menempatkan peserta didik sebagai subjek belajar.
+
+Guru berperan sebagai fasilitator yang membimbing peserta didik menemukan konsep melalui pengamatan, diskusi, eksplorasi, pemecahan masalah, refleksi, dan presentasi hasil belajar.
+"""
+
+
+def buat_lingkungan():
 
     return """
-• Laptop
+Lingkungan Fisik
 
-• LCD
+• Ruang kelas yang bersih, nyaman, dan tertata.
 
-• LKPD
+• Tempat duduk berkelompok.
 
-• Buku Guru
+• LCD/Proyektor.
 
-• Buku Siswa
+• Buku dan media pembelajaran.
 
-• Internet
+Lingkungan Sosial
 
-• Lingkungan sekitar
-""".strip()
+• Suasana saling menghargai.
+
+• Aman untuk bertanya.
+
+• Kolaboratif.
+
+• Menghargai perbedaan pendapat.
+"""
 
 
-# =========================================================
-# KARAKTERISTIK
-# =========================================================
-
-def generate_karakteristik():
+def buat_kemitraan():
 
     return """
-Peserta didik memiliki kemampuan yang beragam.
+Guru memfasilitasi pembelajaran sebagai pendamping.
 
-Guru menerapkan pembelajaran berdiferensiasi
-sesuai kebutuhan belajar peserta didik.
-""".strip()
-import streamlit as st
+Peserta didik bekerja sama dalam kelompok.
 
-from modules.generator import (
-    generate_tujuan,
-    generate_pemahaman,
-    generate_pemantik,
-    generate_profil,
-    generate_deep_learning,
-    generate_sarana,
-    generate_karakteristik
-)
+Teknologi digital dimanfaatkan sebagai sumber belajar.
 
-st.title("🎯 Generator Tujuan Pembelajaran")
+Orang tua dapat memberikan dukungan belajar di rumah.
+"""
 
-st.write(
-    "Klik tombol di bawah untuk membuat rancangan awal secara otomatis."
-)
 
-if st.button("🚀 Generate Tujuan", use_container_width=True):
+def buat_digital(mapel):
 
-    tujuan = generate_tujuan(
-        st.session_state.get("mapel", ""),
-        st.session_state.get("topik", ""),
-        st.session_state.get("kelas", "")
+    return f"""
+Pemanfaatan teknologi digital dilakukan melalui:
+
+• Google Classroom
+
+• Google Docs
+
+• Canva
+
+• YouTube Edu
+
+• Quizizz
+
+Pemanfaatan aplikasi disesuaikan dengan karakteristik mata pelajaran {mapel}.
+"""
+
+# ============================================================
+# GENERATE
+# ============================================================
+
+if generate:
+
+    dimensi = buat_dimensi(topik)
+
+    tujuan = buat_tujuan(
+        topik,
+        mapel,
+        kelas,
+        tujuan_manual
     )
 
-    pemahaman = generate_pemahaman(
-        st.session_state.get("topik", "")
-    )
+    pedagogis = buat_pedagogis(model)
 
-    pemantik = generate_pemantik(
-        st.session_state.get("topik", "")
-    )
+    lingkungan = buat_lingkungan()
 
-    profil = generate_profil(
-        st.session_state.get("profil", [])
-    )
+    kemitraan = buat_kemitraan()
 
-    deep = generate_deep_learning(
-        st.session_state.get("topik", "")
-    )
+    digital = buat_digital(mapel)
 
-    sarana = generate_sarana()
-
-    karakteristik = generate_karakteristik()
-
+    st.session_state["dimensi"] = dimensi
     st.session_state["tujuan"] = tujuan
-    st.session_state["pemahaman"] = pemahaman
-    st.session_state["pemantik"] = pemantik
-    st.session_state["profil_hasil"] = profil
-    st.session_state["deep"] = deep
-    st.session_state["sarana"] = sarana
-    st.session_state["karakteristik"] = karakteristik
+    st.session_state["pedagogis"] = pedagogis
+    st.session_state["lingkungan"] = lingkungan
+    st.session_state["kemitraan"] = kemitraan
+    st.session_state["digital"] = digital
 
-st.subheader("1. Tujuan Pembelajaran")
-st.text_area("", st.session_state.get("tujuan", ""), height=120)
+# ============================================================
+# TAMPILKAN HASIL BAGIAN AWAL RPP
+# ============================================================
 
-st.subheader("2. Pemahaman Bermakna")
-st.text_area("", st.session_state.get("pemahaman", ""), height=100)
+if "tujuan" in st.session_state:
 
-st.subheader("3. Pertanyaan Pemantik")
-st.text_area("", st.session_state.get("pemantik", ""), height=120)
+    st.divider()
 
-st.subheader("4. Profil Lulusan")
-st.text_area("", st.session_state.get("profil_hasil", ""), height=120)
+    st.header("📄 HASIL GENERATOR RPP")
 
-st.subheader("5. Pembelajaran Mendalam")
-st.text_area("", st.session_state.get("deep", ""), height=140)
+    st.subheader("1. Dimensi Profil Lulusan")
 
-st.subheader("6. Sarana dan Prasarana")
-st.text_area("", st.session_state.get("sarana", ""), height=120)
-
-st.subheader("7. Karakteristik Peserta Didik")
-st.text_area("", st.session_state.get("karakteristik", ""), height=120)
-"""
-=================================================
-GENERATOR LANGKAH PEMBELAJARAN
-RPM CERDAS AI
-=================================================
-"""
-
-def generate_langkah(model, topik, tujuan):
-
-    langkah = f"""
-# LANGKAH PEMBELAJARAN
-
-## A. Pendahuluan (10 Menit)
-
-1. Guru memberi salam dan doa.
-2. Guru mengecek kehadiran peserta didik.
-3. Guru melakukan apersepsi tentang materi **{topik}**.
-4. Guru menyampaikan tujuan pembelajaran:
-
-{tujuan}
-
-5. Guru memberikan motivasi belajar.
-
-"""
-
-    # ==============================
-    # MODEL PBL
-    # ==============================
-
-    if model == "Problem Based Learning":
-
-        langkah += f"""
-
-## B. Kegiatan Inti (60 Menit)
-
-### Orientasi Masalah
-Guru menyajikan permasalahan nyata berkaitan dengan **{topik}**.
-
-### Mengorganisasi Peserta Didik
-
-Peserta didik dibagi dalam beberapa kelompok.
-
-### Investigasi
-
-Peserta didik mencari informasi dari buku, internet maupun lingkungan sekitar.
-
-### Presentasi
-
-Kelompok mempresentasikan hasil diskusi.
-
-### Evaluasi
-
-Guru dan peserta didik menyimpulkan hasil pembelajaran.
-
-"""
-
-    # ==============================
-
-    elif model == "Project Based Learning":
-
-        langkah += f"""
-
-## B. Kegiatan Inti (60 Menit)
-
-1. Guru menjelaskan proyek.
-
-2. Peserta didik menyusun rencana proyek.
-
-3. Peserta didik mengerjakan proyek.
-
-4. Guru memonitor kegiatan.
-
-5. Peserta didik mempresentasikan hasil proyek.
-
-"""
-
-    # ==============================
-
-    elif model == "Discovery Learning":
-
-        langkah += f"""
-
-## B. Kegiatan Inti (60 Menit)
-
-1. Stimulasi
-
-2. Identifikasi Masalah
-
-3. Pengumpulan Data
-
-4. Pengolahan Data
-
-5. Verifikasi
-
-6. Generalisasi
-
-"""
-
-    # ==============================
-
-    else:
-
-        langkah += """
-
-## B. Kegiatan Inti (60 Menit)
-
-Guru memfasilitasi pembelajaran aktif sesuai model yang dipilih.
-
-Peserta didik berdiskusi.
-
-Peserta didik mempresentasikan hasil belajar.
-
-Guru memberikan penguatan.
-
-"""
-
-    langkah += """
-
-## C. Penutup (10 Menit)
-
-1. Guru bersama peserta didik membuat kesimpulan.
-
-2. Guru melakukan refleksi.
-
-3. Guru memberikan umpan balik.
-
-4. Guru menyampaikan tindak lanjut.
-
-5. Guru menutup pelajaran dengan doa.
-
-"""
-
-    return langkahimport streamlit as st
-
-from modules.langkah_generator import generate_langkah
-
-st.title("📚 Langkah Pembelajaran")
-
-st.write("Generator langkah pembelajaran otomatis.")
-
-if st.button("🚀 Generate Langkah"):
-
-    langkah = generate_langkah(
-
-        st.session_state.get("model",""),
-
-        st.session_state.get("topik",""),
-
-        st.session_state.get("tujuan","")
-
+    st.text_area(
+        "",
+        st.session_state["dimensi"],
+        height=170
     )
 
-    st.session_state["langkah"] = langkah
+    st.subheader("2. Tujuan Pembelajaran")
 
-st.text_area(
+    st.text_area(
+        "",
+        st.session_state["tujuan"],
+        height=220
+    )
 
-    "Hasil Langkah Pembelajaran",
+    st.subheader("3. Praktik Pedagogis")
 
-    value=st.session_state.get("langkah",""),
+    st.text_area(
+        "",
+        st.session_state["pedagogis"],
+        height=160
+    )
 
-    height=500
+    st.subheader("4. Lingkungan Pembelajaran")
 
-)
+    st.text_area(
+        "",
+        st.session_state["lingkungan"],
+        height=180
+    )
+
+    st.subheader("5. Kemitraan Pembelajaran")
+
+    st.text_area(
+        "",
+        st.session_state["kemitraan"],
+        height=150
+    )
+
+    st.subheader("6. Pemanfaatan Digital")
+
+    st.text_area(
+        "",
+        st.session_state["digital"],
+        height=170
+    )
