@@ -6,14 +6,21 @@ from docx.oxml.ns import nsdecls
 import io
 
 def panggil_ai_guru(topik, cp, komponen, instruksi):
+    api_key_ai = st.secrets.get("GEMINI_API_KEY", "")
+    if not api_key_ai:
+        return "⚠️ Kunci API kosong di menu Secrets Streamlit Anda."
     try:
-        import requests
-        url = "https://vercel.app"
-        p = {"topik": topik, "cp": cp, "komponen": komponen, "instruksi": instruksi}
-        res = requests.get(url, params=p, timeout=25).json()
-        return res.get('text', "⏳ Sistem sibuk. Klik tombol sekali lagi.")
-    except Exception:
-        return "⚠️ Koneksi sibuk. Silakan klik tombol AI sekali lagi."
+        import requests, json
+        # Jalur resmi dan murni langsung ke server Google Gemini
+        url = "https://googleapis.com"
+        headers = {'Content-Type': 'application/json'}
+        params = {"key": str(api_key_ai).strip()}
+        prompt = f"Topik: {topik}\nCP: {cp}\nKomponen: {komponen}\nInstruksi: {instruksi}"
+        payload = {"contents": [{"parts": [{"text": prompt}]}]}
+        response = requests.post(url, params=params, headers=headers, json=payload)
+        return response.json()['candidates'][0]['content']['parts'][0]['text']
+    except Exception as e:
+        return f"⚠️ Gagal memuat AI otomatis. (Detail: {str(e)})"
 
 def buat_dokumen_rpm(d):
     doc = Document()
@@ -102,16 +109,16 @@ with col2:
     if st.button("✨ 1 & 2. Rumuskan Profil Lulusan & Tujuan (AI)"):
         with st.spinner("AI memproses..."):
             st.session_state.profil_ai = panggil_ai_guru(topik, cp, "Dimensi Profil Lulusan", "Rumuskan dimensi Profil Pelajar Pancasila Abad 21 yang spesifik dan tepat sesuai isi materi.")
-            st.session_state.tujuan_ai = panggil_ai_guru(topik, cp, "Tujuan Pembelajaran", "Buat Tujuan Pembelajaran mendalam yang wajib mencakup: 1) Berkesadaran tinggi, 2) Bermakna bagi kehidupan, 3) Menggembirakan.")
+            st.session_state.tujuan_ai = panggil_ai_guru(topik, cp, "Tujuan Pembelajaran", "Buat Tujuan Pembelajaran mendalam yang wajib mencakup aspek: Berkesadaran tinggi, Bermakna bagi kehidupan, dan Menggembirakan.")
             st.rerun()
     if st.button("🔥 7. Kembangkan Kegiatan Pembelajaran Rinci (AI)"):
         with st.spinner("AI memproses..."):
-            ins_l = "Susun skenario pembelajaran berbasis masalah (PBL) sangat detail per menit dengan uraian 3 tahap mutlak: Pendahuluan, Isi/Inti (Penyelidikan masalah kelompok & digital), dan Penutup (Refleksi)."
+            ins_l = "Susun skenario pembelajaran berbasis masalah (PBL) sangat detail per menit dengan uraian 3 tahap mutlak: 1. Pendahuluan, 2. Isi/Inti (Penyelidikan masalah kelompok & pemanfaatan teknologi digital), dan 3. Penutup (Refleksi emosional bermakna)."
             st.session_state.langkah_ai = panggil_ai_guru(topik, cp, "Langkah Pembelajaran", ins_l)
             st.rerun()
     if st.button("📊 8. Buat Instrumen Asesmen & LKPD Lengkap (AI)"):
         with st.spinner("AI memproses..."):
-            ins_a = "Buat paket evaluasi lengkap: 1) Teknik Formatif & Sumatif. 2) Lembar Kerja Peserta Didik (LKPD/LKM) studi kasus riil. 3) Rubrik Penilaian Kelompok detail skor 1 sampai 4."
+            ins_a = "Buat paket evaluasi lengkap: 1) Teknik Formatif & Sumatif. 2) Lembar Kerja Peserta Didik (LKPD/LKM) berbasis studi kasus riil logika tinggi. 3) Kriteria Rubrik Penilaian Kelompok detail skor 1 sampai 4 beserta indikatornya."
             st.session_state.asesmen_ai = panggil_ai_guru(topik, cp, "Asesmen & LKPD", ins_a)
             st.rerun()
 
