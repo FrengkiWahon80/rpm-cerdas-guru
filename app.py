@@ -7,12 +7,15 @@ import io
 import time
 
 def panggil_ai_guru(topik, cp, komponen_rpp, instruksi_khusus):
-    api_key_ai = st.secrets.get("GEMINI_API_KEY", "")
-    if not api_key_ai:
+    api_key_raw = st.secrets.get("GEMINI_API_KEY", "")
+    # Membersihkan karakter spasi atau tanda petik yang tidak sengaja terikut di menu Secrets
+    api_key_clean = str(api_key_raw).strip().replace('"', '').replace("'", "")
+    
+    if not api_key_clean:
         return "⚠️ Kunci API kosong di menu Secrets Streamlit Anda."
     try:
         from google import genai
-        client = genai.Client(api_key=str(api_key_ai).strip())
+        client = genai.Client(api_key=api_key_clean)
         time.sleep(1)
         prompt = f"Topik: {topik}\nCP: {cp}\nKomponen: {komponen_rpp}\nInstruksi: {instruksi_khusus}"
         response = client.models.generate_content(model='gemini-2.0-flash', contents=prompt)
@@ -51,7 +54,6 @@ def buat_dokumen_rpm(data):
     doc.add_heading("II. KOMKONEN INTI RPM MENDALAM", level=2)
     t_inti = doc.add_table(rows=9, cols=2); t_inti.style = 'Table Grid'
     
-    # Perbaikan Presisi: Mengisi teks header kolom 0 dan kolom 1 baris ke-0 secara individual
     t_inti.rows[0].cells[0].paragraphs[0].text = 'Komponen RPM'
     t_inti.rows[0].cells[1].paragraphs[0].text = 'Deskripsi / Detail Rencana Kerja (Hasil AI & Guru)'
     t_inti.rows[0].cells[0].paragraphs[0].runs[0].font.bold = True
@@ -78,8 +80,6 @@ def buat_dokumen_rpm(data):
     
     doc.add_heading("III. PENGESAHAN", level=2)
     ttd = doc.add_table(rows=1, cols=2)
-    
-    # Perbaikan Presisi: Memecah objek sel tanda tangan secara mandiri tanpa loop tuple
     cell_kiri = ttd.rows[0].cells[0]
     cell_kanan = ttd.rows[0].cells[1]
     
