@@ -4,32 +4,24 @@ from docx.shared import Inches, Pt
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 import io
+import time
 
-# =====================================================================
-# FUNGSI AI RESMI GOOGLE SDK - MODEL TERBARU AKTIF TAHUN 2026
-# =====================================================================
 def panggil_ai_guru(topik, cp, komponen_rpp, instruksi_khusus):
     api_key_ai = st.secrets.get("GEMINI_API_KEY", "")
     if not api_key_ai:
-        return "⚠️ Kunci API kosong. Mohon isi 'GEMINI_API_KEY' di menu Secrets Streamlit Cloud Anda."
-        
+        return "⚠️ Kunci API kosong di menu Secrets Streamlit Anda."
     try:
         from google import genai
         client = genai.Client(api_key=str(api_key_ai).strip())
+        time.sleep(1)
         prompt = f"Topik: {topik}\nCP: {cp}\nKomponen: {komponen_rpp}\nInstruksi: {instruksi_khusus}"
-        
-        # PERBAIKAN MUTLAK: Menggunakan model terupdate tahun 2026 yang diizinkan Google
-        response = client.models.generate_content(
-            model='gemini-2.0-flash',
-            contents=prompt,
-        )
+        response = client.models.generate_content(model='gemini-2.0-flash', contents=prompt)
         return response.text
     except Exception as e:
-        return f"⚠️ Gagal memuat AI otomatis. Silakan isi manual. (Detail: {str(e)})"
+        if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+            return "⏳ Antrean AI Google sedang penuh. Sila tunggu 30 detik lalu klik kembali."
+        return f"⚠️ Gagal memuat AI otomatis. (Detail: {str(e)})"
 
-# =====================================================================
-# FUNGSI UTAMA: MENYUSUN DATA MENJADI TABEL WORD YANG RAPI
-# =====================================================================
 def buat_dokumen_rpm(data):
     doc = Document()
     for s in doc.sections:
@@ -51,20 +43,19 @@ def buat_dokumen_rpm(data):
         ("Capaian Pembelajaran (CP)", data.get('cp', ''))
     ]
     for i, (l, v) in enumerate(lbls):
-        ti.rows[i].cells[0].paragraphs[0].text = str(l)
-        ti.rows[i].cells[1].paragraphs[0].text = str(v)
-        ti.rows[i].cells[0].paragraphs[0].runs[0].font.bold = True
+        ti.rows[i].cells.paragraphs.text = str(l)
+        ti.rows[i].cells.paragraphs.text = str(v)
+        ti.rows[i].cells.paragraphs.runs.font.bold = True
     doc.add_paragraph()
     
     doc.add_heading("II. KOMKONEN INTI RPM MENDALAM", level=2)
     t_inti = doc.add_table(rows=9, cols=2); t_inti.style = 'Table Grid'
-    
-    t_inti.rows[0].cells[0].paragraphs[0].text = 'Komponen RPM'
-    t_inti.rows[0].cells[1].paragraphs[0].text = 'Deskripsi / Detail Rencana Kerja (Hasil AI & Guru)'
-    t_inti.rows[0].cells[0].paragraphs[0].runs[0].font.bold = True
-    t_inti.rows[0].cells[1].paragraphs[0].runs[0].font.bold = True
-    t_inti.rows[0].cells[0]._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
-    t_inti.rows[0].cells[1]._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
+    t_inti.rows.cells.paragraphs.text = 'Komponen RPM'
+    t_inti.rows.cells.paragraphs.text = 'Deskripsi / Detail Rencana Kerja (Hasil AI & Guru)'
+    t_inti.rows.cells.paragraphs.runs.font.bold = True
+    t_inti.rows.cells.paragraphs.runs.font.bold = True
+    t_inti.rows.cells._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
+    t_inti.rows.cells._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
     
     k_data = [
         ("1. Dimensi Profil Lulusan", data.get('dimensi_profil', '')),
@@ -77,29 +68,23 @@ def buat_dokumen_rpm(data):
         ("8. Asesmen & Lembar Kerja", data.get('asesmen_total', ''))
     ]
     for i, (k, isi) in enumerate(k_data):
-        t_inti.rows[i+1].cells[0].paragraphs[0].text = str(k)
-        t_inti.rows[i+1].cells[1].paragraphs[0].text = str(isi)
-        t_inti.rows[i+1].cells[0].paragraphs[0].runs[0].font.bold = True
+        t_inti.rows[i+1].cells.paragraphs.text = str(k)
+        t_inti.rows[i+1].cells.paragraphs.text = str(isi)
+        t_inti.rows[i+1].cells.paragraphs.runs.font.bold = True
     doc.add_paragraph(); doc.add_paragraph()
     
     doc.add_heading("III. PENGESAHAN", level=2)
     ttd = doc.add_table(rows=1, cols=2)
-    
-    cell_ks = ttd.rows[0].cells[0]
-    cell_gr = ttd.rows[0].cells[1]
-    
+    cell_ks = ttd.rows.cells
+    cell_gr = ttd.rows.cells
     cell_ks._tc.get_or_add_tcPr().append(parse_xml(r'<w:tcBorders {}><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders>'.format(nsdecls('w'))))
     cell_gr._tc.get_or_add_tcPr().append(parse_xml(r'<w:tcBorders {}><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders>'.format(nsdecls('w'))))
-    
-    cell_ks.paragraphs[0].text = f"Mengetahui,\nKepala Sekolah {data.get('sekolah', '')}\n\n\n\n\n( _______________________ )"
-    cell_gr.paragraphs[0].text = f"Guru Mata Pelajaran,\n\n\n\n\n\n( {data.get('guru', '')} )"
+    cell_ks.paragraphs.text = f"Mengetahui,\nKepala Sekolah {data.get('sekolah', '')}\n\n\n\n\n( _______________________ )"
+    cell_gr.paragraphs.text = f"Guru Mata Pelajaran,\n\n\n\n\n\n( {data.get('guru', '')} )"
     
     stream = io.BytesIO(); doc.save(stream); stream.seek(0)
     return stream
 
-# =====================================================================
-# ANTARMUKA WEB STREAMLIT
-# =====================================================================
 st.set_page_config(page_title="Aplikasi Pembuat RPM Cerdas", layout="wide")
 st.title("🤖 Aplikasi Pembuat Rencana Pembelajaran Mendalam (RPM) Berbasis AI")
 
@@ -121,7 +106,6 @@ with col1:
 
 with col2:
     st.subheader("II. Tombol Generator Cerdas AI")
-    st.info("💡 Klik tombol di bawah ini satu per satu untuk mengisi draf RPM secara otomatis.")
     if st.button("✨ 1 & 2. Rumuskan Profil Lulusan & Tujuan (AI)"):
         with st.spinner("AI memproses..."):
             st.session_state.profil_ai = panggil_ai_guru(topik, cp, "Dimensi Profil Lulusan", "Rincikan Keterampilan abad 21.")
@@ -141,7 +125,7 @@ st.subheader("III. Peninjauan & Penyempurnaan Teks (Dapat Diedit Manual)")
 dimensi_profil = st.text_area("1. Dimensi Profil Lulusan", st.session_state.profil_ai if st.session_state.profil_ai else "Klik tombol AI di atas", height=100)
 tujuan_pembelajaran = st.text_area("2. Tujuan Pembelajaran", st.session_state.tujuan_ai if st.session_state.tujuan_ai else "Klik tombol AI di atas", height=100)
 praktik_pedagogis = st.text_area("3. Praktik Pedagogis", "Menggunakan pendekatan Problem-Based Learning (PBL) berbasis penyelidikan kasus nyata secara berkelompok.")
-lingkungan_belajar = st.text_area("4. Lingkungan Pembelajaran", "Fisik: Susunan meja berkelompok. Budaya: Saling menghargai argumen, ramah kesalahan, abaikan rasa takut.")
+lingkungan_belajar = st.text_area("4. Lingkungan Pembelajaran", "Fisik: Susunan meja berkelompok. Budaya: Saling menghargai argumen, ramah kesalahan, refleksi terbuka.")
 kemitraan_belajar = st.text_area("5. Kemitraan Pembelajaran", "Kolaborasi aktif antar peserta didik, guru sebagai fasilitator, dan pemanfaatan gawai cerdas.")
 pemanfaatan_digital = st.text_area("6. Pemanfaatan Digital", "Platform kolaborasi online untuk pengerjaan tugas kelompok secara real-time.")
 langkah_pembelajaran = st.text_area("7. Langkah Pembelajaran Rinci", st.session_state.langkah_ai if st.session_state.langkah_ai else "Klik tombol AI di atas", height=150)
