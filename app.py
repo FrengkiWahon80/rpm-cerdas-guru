@@ -669,3 +669,166 @@ st.text_area("", st.session_state.get("sarana", ""), height=120)
 
 st.subheader("7. Karakteristik Peserta Didik")
 st.text_area("", st.session_state.get("karakteristik", ""), height=120)
+"""
+=================================================
+GENERATOR LANGKAH PEMBELAJARAN
+RPM CERDAS AI
+=================================================
+"""
+
+def generate_langkah(model, topik, tujuan):
+
+    langkah = f"""
+# LANGKAH PEMBELAJARAN
+
+## A. Pendahuluan (10 Menit)
+
+1. Guru memberi salam dan doa.
+2. Guru mengecek kehadiran peserta didik.
+3. Guru melakukan apersepsi tentang materi **{topik}**.
+4. Guru menyampaikan tujuan pembelajaran:
+
+{tujuan}
+
+5. Guru memberikan motivasi belajar.
+
+"""
+
+    # ==============================
+    # MODEL PBL
+    # ==============================
+
+    if model == "Problem Based Learning":
+
+        langkah += f"""
+
+## B. Kegiatan Inti (60 Menit)
+
+### Orientasi Masalah
+Guru menyajikan permasalahan nyata berkaitan dengan **{topik}**.
+
+### Mengorganisasi Peserta Didik
+
+Peserta didik dibagi dalam beberapa kelompok.
+
+### Investigasi
+
+Peserta didik mencari informasi dari buku, internet maupun lingkungan sekitar.
+
+### Presentasi
+
+Kelompok mempresentasikan hasil diskusi.
+
+### Evaluasi
+
+Guru dan peserta didik menyimpulkan hasil pembelajaran.
+
+"""
+
+    # ==============================
+
+    elif model == "Project Based Learning":
+
+        langkah += f"""
+
+## B. Kegiatan Inti (60 Menit)
+
+1. Guru menjelaskan proyek.
+
+2. Peserta didik menyusun rencana proyek.
+
+3. Peserta didik mengerjakan proyek.
+
+4. Guru memonitor kegiatan.
+
+5. Peserta didik mempresentasikan hasil proyek.
+
+"""
+
+    # ==============================
+
+    elif model == "Discovery Learning":
+
+        langkah += f"""
+
+## B. Kegiatan Inti (60 Menit)
+
+1. Stimulasi
+
+2. Identifikasi Masalah
+
+3. Pengumpulan Data
+
+4. Pengolahan Data
+
+5. Verifikasi
+
+6. Generalisasi
+
+"""
+
+    # ==============================
+
+    else:
+
+        langkah += """
+
+## B. Kegiatan Inti (60 Menit)
+
+Guru memfasilitasi pembelajaran aktif sesuai model yang dipilih.
+
+Peserta didik berdiskusi.
+
+Peserta didik mempresentasikan hasil belajar.
+
+Guru memberikan penguatan.
+
+"""
+
+    langkah += """
+
+## C. Penutup (10 Menit)
+
+1. Guru bersama peserta didik membuat kesimpulan.
+
+2. Guru melakukan refleksi.
+
+3. Guru memberikan umpan balik.
+
+4. Guru menyampaikan tindak lanjut.
+
+5. Guru menutup pelajaran dengan doa.
+
+"""
+
+    return langkahimport streamlit as st
+
+from modules.langkah_generator import generate_langkah
+
+st.title("📚 Langkah Pembelajaran")
+
+st.write("Generator langkah pembelajaran otomatis.")
+
+if st.button("🚀 Generate Langkah"):
+
+    langkah = generate_langkah(
+
+        st.session_state.get("model",""),
+
+        st.session_state.get("topik",""),
+
+        st.session_state.get("tujuan","")
+
+    )
+
+    st.session_state["langkah"] = langkah
+
+st.text_area(
+
+    "Hasil Langkah Pembelajaran",
+
+    value=st.session_state.get("langkah",""),
+
+    height=500
+
+)
