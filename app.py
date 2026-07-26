@@ -225,3 +225,253 @@ Dikembangkan menggunakan Python + Streamlit
 """,
 unsafe_allow_html=True
 )
+# ==========================================================
+# HALAMAN IDENTITAS
+# RPM CERDAS AI
+# ==========================================================
+
+import streamlit as st
+
+st.set_page_config(page_title="Identitas", page_icon="📋", layout="wide")
+
+st.title("📋 Identitas Pembelajaran")
+
+st.markdown("Lengkapi identitas perangkat pembelajaran terlebih dahulu.")
+
+st.divider()
+
+# ==========================================================
+# IDENTITAS SEKOLAH
+# ==========================================================
+
+st.subheader("🏫 Identitas Sekolah")
+
+col1, col2 = st.columns(2)
+
+with col1:
+
+    sekolah = st.text_input(
+        "Nama Sekolah",
+        value=st.session_state.get("sekolah", "")
+    )
+
+    guru = st.text_input(
+        "Nama Guru",
+        value=st.session_state.get("guru", "")
+    )
+
+    nip = st.text_input(
+        "NIP",
+        value=st.session_state.get("nip", "")
+    )
+
+    mapel = st.selectbox(
+        "Mata Pelajaran",
+        [
+            "Pendidikan Agama",
+            "PPKn",
+            "Bahasa Indonesia",
+            "Matematika",
+            "IPA",
+            "IPS",
+            "Bahasa Inggris",
+            "Seni Budaya",
+            "PJOK",
+            "Informatika",
+            "Prakarya"
+        ]
+    )
+
+with col2:
+
+    kelas = st.selectbox(
+        "Kelas",
+        ["VII", "VIII", "IX"]
+    )
+
+    fase = st.selectbox(
+        "Fase",
+        ["D"]
+    )
+
+    semester = st.selectbox(
+        "Semester",
+        ["Ganjil", "Genap"]
+    )
+
+    tahun = st.text_input(
+        "Tahun Pelajaran",
+        value="2026/2027"
+    )
+
+# ==========================================================
+# PEMBELAJARAN
+# ==========================================================
+
+st.divider()
+
+st.subheader("📖 Informasi Pembelajaran")
+
+materi = st.text_input(
+    "Materi Pokok"
+)
+
+topik = st.text_input(
+    "Topik Pembelajaran"
+)
+
+alokasi = st.text_input(
+    "Alokasi Waktu",
+    value="2 x 40 Menit"
+)
+
+cp = st.text_area(
+    "Capaian Pembelajaran (CP)",
+    height=150
+)
+
+# ==========================================================
+# MODEL PEMBELAJARAN
+# ==========================================================
+
+st.divider()
+
+st.subheader("🎯 Strategi Pembelajaran")
+
+col3, col4 = st.columns(2)
+
+with col3:
+
+    model = st.selectbox(
+        "Model Pembelajaran",
+        [
+            "Problem Based Learning",
+            "Project Based Learning",
+            "Discovery Learning",
+            "Inquiry Learning",
+            "Cooperative Learning",
+            "Problem Solving",
+            "Contextual Teaching Learning",
+            "Role Playing"
+        ]
+    )
+
+    pendekatan = st.selectbox(
+        "Pendekatan",
+        [
+            "Deep Learning",
+            "Saintifik",
+            "Teaching at The Right Level",
+            "Konstruktivistik"
+        ]
+    )
+
+with col4:
+
+    metode = st.multiselect(
+        "Metode Pembelajaran",
+        [
+            "Diskusi",
+            "Ceramah",
+            "Presentasi",
+            "Tanya Jawab",
+            "Penugasan",
+            "Observasi",
+            "Eksperimen",
+            "Studi Kasus"
+        ],
+        default=["Diskusi", "Presentasi"]
+    )
+
+    media = st.text_input(
+        "Media Pembelajaran",
+        value="LCD, Laptop, LKPD"
+    )
+
+# ==========================================================
+# SUMBER BELAJAR
+# ==========================================================
+
+st.divider()
+
+st.subheader("📚 Sumber Belajar")
+
+sumber = st.text_area(
+    "Sumber Belajar",
+    value="""1. Buku Guru
+2. Buku Siswa
+3. Internet
+4. Lingkungan Sekitar"""
+)
+
+# ==========================================================
+# PROFIL LULUSAN
+# ==========================================================
+
+st.divider()
+
+st.subheader("🌟 Profil Lulusan")
+
+profil = st.multiselect(
+    "Pilih Dimensi Profil Lulusan",
+    [
+        "Keimanan dan Ketakwaan terhadap Tuhan YME",
+        "Kewargaan",
+        "Penalaran Kritis",
+        "Kreativitas",
+        "Kolaborasi",
+        "Komunikasi",
+        "Kesehatan"
+    ],
+    default=["Penalaran Kritis"]
+)
+
+# ==========================================================
+# UPLOAD
+# ==========================================================
+
+st.divider()
+
+st.subheader("🖼 Upload Dokumen")
+
+logo = st.file_uploader(
+    "Logo Sekolah",
+    type=["png", "jpg", "jpeg"]
+)
+
+ttd_guru = st.file_uploader(
+    "Tanda Tangan Guru",
+    type=["png", "jpg"]
+)
+
+ttd_kepsek = st.file_uploader(
+    "Tanda Tangan Kepala Sekolah",
+    type=["png", "jpg"]
+)
+
+# ==========================================================
+# SIMPAN SESSION
+# ==========================================================
+
+if st.button("💾 Simpan Identitas", use_container_width=True):
+
+    st.session_state["sekolah"] = sekolah
+    st.session_state["guru"] = guru
+    st.session_state["nip"] = nip
+    st.session_state["mapel"] = mapel
+    st.session_state["kelas"] = kelas
+    st.session_state["fase"] = fase
+    st.session_state["semester"] = semester
+    st.session_state["tahun"] = tahun
+    st.session_state["materi"] = materi
+    st.session_state["topik"] = topik
+    st.session_state["alokasi"] = alokasi
+    st.session_state["cp"] = cp
+    st.session_state["model"] = model
+    st.session_state["pendekatan"] = pendekatan
+    st.session_state["metode"] = metode
+    st.session_state["media"] = media
+    st.session_state["sumber"] = sumber
+    st.session_state["profil"] = profil
+
+    st.success("✅ Identitas berhasil disimpan.")
