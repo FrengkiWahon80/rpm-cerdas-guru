@@ -43,19 +43,21 @@ def buat_dokumen_rpm(data):
         ("Capaian Pembelajaran (CP)", data.get('cp', ''))
     ]
     for i, (l, v) in enumerate(lbls):
-        ti.rows[i].cells.paragraphs.text = str(l)
-        ti.rows[i].cells.paragraphs.text = str(v)
-        ti.rows[i].cells.paragraphs.runs.font.bold = True
+        ti.rows[i].cells[0].paragraphs[0].text = str(l)
+        ti.rows[i].cells[1].paragraphs[0].text = str(v)
+        ti.rows[i].cells[0].paragraphs[0].runs[0].font.bold = True
     doc.add_paragraph()
     
     doc.add_heading("II. KOMKONEN INTI RPM MENDALAM", level=2)
     t_inti = doc.add_table(rows=9, cols=2); t_inti.style = 'Table Grid'
-    t_inti.rows.cells.paragraphs.text = 'Komponen RPM'
-    t_inti.rows.cells.paragraphs.text = 'Deskripsi / Detail Rencana Kerja (Hasil AI & Guru)'
-    t_inti.rows.cells.paragraphs.runs.font.bold = True
-    t_inti.rows.cells.paragraphs.runs.font.bold = True
-    t_inti.rows.cells._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
-    t_inti.rows.cells._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
+    
+    # Perbaikan Presisi: Mengisi teks header kolom 0 dan kolom 1 baris ke-0 secara individual
+    t_inti.rows[0].cells[0].paragraphs[0].text = 'Komponen RPM'
+    t_inti.rows[0].cells[1].paragraphs[0].text = 'Deskripsi / Detail Rencana Kerja (Hasil AI & Guru)'
+    t_inti.rows[0].cells[0].paragraphs[0].runs[0].font.bold = True
+    t_inti.rows[0].cells[1].paragraphs[0].runs[0].font.bold = True
+    t_inti.rows[0].cells[0]._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
+    t_inti.rows[0].cells[1]._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
     
     k_data = [
         ("1. Dimensi Profil Lulusan", data.get('dimensi_profil', '')),
@@ -68,19 +70,24 @@ def buat_dokumen_rpm(data):
         ("8. Asesmen & Lembar Kerja", data.get('asesmen_total', ''))
     ]
     for i, (k, isi) in enumerate(k_data):
-        t_inti.rows[i+1].cells.paragraphs.text = str(k)
-        t_inti.rows[i+1].cells.paragraphs.text = str(isi)
-        t_inti.rows[i+1].cells.paragraphs.runs.font.bold = True
+        row_idx = i + 1
+        t_inti.rows[row_idx].cells[0].paragraphs[0].text = str(k)
+        t_inti.rows[row_idx].cells[1].paragraphs[0].text = str(isi)
+        t_inti.rows[row_idx].cells[0].paragraphs[0].runs[0].font.bold = True
     doc.add_paragraph(); doc.add_paragraph()
     
     doc.add_heading("III. PENGESAHAN", level=2)
     ttd = doc.add_table(rows=1, cols=2)
-    cell_ks = ttd.rows.cells
-    cell_gr = ttd.rows.cells
-    cell_ks._tc.get_or_add_tcPr().append(parse_xml(r'<w:tcBorders {}><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders>'.format(nsdecls('w'))))
-    cell_gr._tc.get_or_add_tcPr().append(parse_xml(r'<w:tcBorders {}><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders>'.format(nsdecls('w'))))
-    cell_ks.paragraphs.text = f"Mengetahui,\nKepala Sekolah {data.get('sekolah', '')}\n\n\n\n\n( _______________________ )"
-    cell_gr.paragraphs.text = f"Guru Mata Pelajaran,\n\n\n\n\n\n( {data.get('guru', '')} )"
+    
+    # Perbaikan Presisi: Memecah objek sel tanda tangan secara mandiri tanpa loop tuple
+    cell_kiri = ttd.rows[0].cells[0]
+    cell_kanan = ttd.rows[0].cells[1]
+    
+    cell_kiri._tc.get_or_add_tcPr().append(parse_xml(r'<w:tcBorders {}><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders>'.format(nsdecls('w'))))
+    cell_kanan._tc.get_or_add_tcPr().append(parse_xml(r'<w:tcBorders {}><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders>'.format(nsdecls('w'))))
+    
+    cell_kiri.paragraphs[0].text = f"Mengetahui,\nKepala Sekolah {data.get('sekolah', '')}\n\n\n\n\n( _______________________ )"
+    cell_kanan.paragraphs[0].text = f"Guru Mata Pelajaran,\n\n\n\n\n\n( {data.get('guru', '')} )"
     
     stream = io.BytesIO(); doc.save(stream); stream.seek(0)
     return stream
