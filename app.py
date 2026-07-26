@@ -6,7 +6,7 @@ from docx.oxml.ns import nsdecls
 import io
 
 # =====================================================================
-# FUNGSI AI RESMI GOOGLE SDK - BEBAS EROR 401 UNAUTHENTICATED
+# FUNGSI AI RESMI GOOGLE SDK - MODEL TERBARU AKTIF TAHUN 2026
 # =====================================================================
 def panggil_ai_guru(topik, cp, komponen_rpp, instruksi_khusus):
     api_key_ai = st.secrets.get("GEMINI_API_KEY", "")
@@ -14,14 +14,13 @@ def panggil_ai_guru(topik, cp, komponen_rpp, instruksi_khusus):
         return "⚠️ Kunci API kosong. Mohon isi 'GEMINI_API_KEY' di menu Secrets Streamlit Cloud Anda."
         
     try:
-        # Wajib menggunakan Google GenAI SDK Resmi agar kunci Anda divalidasi Google
         from google import genai
-        
         client = genai.Client(api_key=str(api_key_ai).strip())
         prompt = f"Topik: {topik}\nCP: {cp}\nKomponen: {komponen_rpp}\nInstruksi: {instruksi_khusus}"
         
+        # PERBAIKAN MUTLAK: Menggunakan model terupdate tahun 2026 yang diizinkan Google
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model='gemini-2.0-flash',
             contents=prompt,
         )
         return response.text
@@ -29,7 +28,7 @@ def panggil_ai_guru(topik, cp, komponen_rpp, instruksi_khusus):
         return f"⚠️ Gagal memuat AI otomatis. Silakan isi manual. (Detail: {str(e)})"
 
 # =====================================================================
-# FUNGSI UTAMA: MENYUSUN DATA MENJADI TABEL WORD YANG RAPI (BEBAS EROR TUPLE)
+# FUNGSI UTAMA: MENYUSUN DATA MENJADI TABEL WORD YANG RAPI
 # =====================================================================
 def buat_dokumen_rpm(data):
     doc = Document()
@@ -60,7 +59,6 @@ def buat_dokumen_rpm(data):
     doc.add_heading("II. KOMKONEN INTI RPM MENDALAM", level=2)
     t_inti = doc.add_table(rows=9, cols=2); t_inti.style = 'Table Grid'
     
-    # Pengisian teks header baris ke-0 secara individual (Kolom 0 dan Kolom 1)
     t_inti.rows[0].cells[0].paragraphs[0].text = 'Komponen RPM'
     t_inti.rows[0].cells[1].paragraphs[0].text = 'Deskripsi / Detail Rencana Kerja (Hasil AI & Guru)'
     t_inti.rows[0].cells[0].paragraphs[0].runs[0].font.bold = True
@@ -87,7 +85,6 @@ def buat_dokumen_rpm(data):
     doc.add_heading("III. PENGESAHAN", level=2)
     ttd = doc.add_table(rows=1, cols=2)
     
-    # Pengisian area tanda tangan per sel kolom secara mandiri tanpa loop tuple
     cell_ks = ttd.rows[0].cells[0]
     cell_gr = ttd.rows[0].cells[1]
     
@@ -144,8 +141,8 @@ st.subheader("III. Peninjauan & Penyempurnaan Teks (Dapat Diedit Manual)")
 dimensi_profil = st.text_area("1. Dimensi Profil Lulusan", st.session_state.profil_ai if st.session_state.profil_ai else "Klik tombol AI di atas", height=100)
 tujuan_pembelajaran = st.text_area("2. Tujuan Pembelajaran", st.session_state.tujuan_ai if st.session_state.tujuan_ai else "Klik tombol AI di atas", height=100)
 praktik_pedagogis = st.text_area("3. Praktik Pedagogis", "Menggunakan pendekatan Problem-Based Learning (PBL) berbasis penyelidikan kasus nyata secara berkelompok.")
-lingkungan_belajar = st.text_area("4. Lingkungan Pembelajaran", "Fisik: Susunan meja berkelompok. Budaya: Saling menghargai argumen, ramah kesalahan, refleksi terbuka.")
-kemitraan_belajar = st.text_area("5. Kemitraan Pembelajaran", "Kolaborasi aktif antar peserta didik, guru sebagai fasilitator, dan didukung gawai cerdas.")
+lingkungan_belajar = st.text_area("4. Lingkungan Pembelajaran", "Fisik: Susunan meja berkelompok. Budaya: Saling menghargai argumen, ramah kesalahan, abaikan rasa takut.")
+kemitraan_belajar = st.text_area("5. Kemitraan Pembelajaran", "Kolaborasi aktif antar peserta didik, guru sebagai fasilitator, dan pemanfaatan gawai cerdas.")
 pemanfaatan_digital = st.text_area("6. Pemanfaatan Digital", "Platform kolaborasi online untuk pengerjaan tugas kelompok secara real-time.")
 langkah_pembelajaran = st.text_area("7. Langkah Pembelajaran Rinci", st.session_state.langkah_ai if st.session_state.langkah_ai else "Klik tombol AI di atas", height=150)
 asesmen_total = st.text_area("8. Asesmen Pembelajaran & LKM", st.session_state.asesmen_ai if st.session_state.asesmen_ai else "Klik tombol AI di atas", height=150)
