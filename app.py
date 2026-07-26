@@ -5,50 +5,19 @@ from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 import io
 
-# =====================================================================
-# FUNGSI AI RESMI GOOGLE SDK - DIJAMIN LOLOS BLOKIR GOOGLE
-# =====================================================================
 def panggil_ai_guru(topik, cp, komponen_rpp, instruksi_khusus):
-    # Mengambil kunci API secara aman dari Secrets Streamlit Cloud
     api_key_ai = st.secrets.get("GEMINI_API_KEY", "")
-    
     if not api_key_ai:
-        return "⚠️ Kunci API kosong. Mohon isi 'GEMINI_API_KEY' di menu Secrets Streamlit Cloud Anda."
-        
+        return "⚠️ Kunci API kosong di menu Secrets Streamlit Anda."
     try:
-        # Menggunakan pustaka resmi google-genai SDK standar industri
         from google import genai
-        
-        # Inisialisasi klien resmi dengan kunci API murni
         client = genai.Client(api_key=str(api_key_ai).strip())
-        
-        prompt = f"""
-        Anda adalah pakar kurikulum pendidikan modern abad 21 dan perancang Rencana Pembelajaran Mendalam (RPM).
-        Tugas Anda adalah mengembangkan komponen '{komponen_rpp}' secara sangat rinci, mendalam, aplikatif, 
-        dan berbobot sebagai referensi utama guru di kelas.
-        
-        Informasi Dasar Kelas:
-        - Topik Pembelajaran: {topik}
-        - Capaian Pembelajaran (CP): {cp}
-        
-        Instruksi Khusus untuk Komponen Ini:
-        {instruksi_khusus}
-        
-        Berikan jawaban dalam Bahasa Indonesia yang padat, aplikatif, tuntas, tanpa basa-basi kalimat pembuka.
-        """
-        
-        # Memanggil model resmi Gemini 2.5 Flash melalui jalur SDK
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-        )
+        prompt = f"Topik: {topik}\nCP: {cp}\nKomponen: {komponen_rpp}\nInstruksi: {instruksi_khusus}"
+        response = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
         return response.text
     except Exception as e:
-        return f"⚠️ Gagal memuat AI otomatis. Anda dapat mengetik manual. (Detail Eror SDK: {str(e)})"
+        return f"⚠️ Gagal memuat AI otomatis. (Detail: {str(e)})"
 
-# =====================================================================
-# FUNGSI UTAMA: MENYUSUN DATA MENJADI TABEL WORD YANG RAPI
-# =====================================================================
 def buat_dokumen_rpm(data):
     doc = Document()
     for s in doc.sections:
@@ -70,21 +39,20 @@ def buat_dokumen_rpm(data):
         ("Capaian Pembelajaran (CP)", data.get('cp', ''))
     ]
     for i, (l, v) in enumerate(lbls):
-        ti.rows[i].cells[0].text = str(l)
-        ti.rows[i].cells[1].text = str(v)
-        ti.rows[i].cells[0].paragraphs[0].runs[0].font.bold = True
+        ti.rows[i].cells.text = str(l)
+        ti.rows[i].cells.text = str(v)
+        ti.rows[i].cells.paragraphs.runs.font.bold = True
     doc.add_paragraph()
     
-    doc.add_heading("II. KOMKONEN INTI RPM MENDALAM", level=2)
+    doc.add_heading("II. KOMPONEN INTI RPM MENDALAM", level=2)
     t_inti = doc.add_table(rows=9, cols=2); t_inti.style = 'Table Grid'
     
-    # Pengisian header tabel inti secara aman per sel kolom 0 dan 1
-    t_inti.rows[0].cells[0].text = 'Komponen RPM'
-    t_inti.rows[0].cells[1].text = 'Deskripsi / Detail Rencana Kerja (Hasil AI & Guru)'
-    t_inti.rows[0].cells[0].paragraphs[0].runs[0].font.bold = True
-    t_inti.rows[0].cells[1].paragraphs[0].runs[0].font.bold = True
-    t_inti.rows[0].cells[0]._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
-    t_inti.rows[0].cells[1]._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
+    t_inti.rows.cells.text = 'Komponen RPM'
+    t_inti.rows.cells.text = 'Deskripsi / Detail Rencana Kerja'
+    t_inti.rows.cells.paragraphs.runs.font.bold = True
+    t_inti.rows.cells.paragraphs.runs.font.bold = True
+    t_inti.rows.cells._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
+    t_inti.rows.cells._tc.get_or_add_tcPr().append(parse_xml(r'<w:shd {} w:fill="E6E6E6"/>'.format(nsdecls('w'))))
     
     k_data = [
         ("1. Dimensi Profil Lulusan", data.get('dimensi_profil', '')),
@@ -97,24 +65,21 @@ def buat_dokumen_rpm(data):
         ("8. Asesmen & Lembar Kerja", data.get('asesmen_total', ''))
     ]
     for i, (k, isi) in enumerate(k_data):
-        t_inti.rows[i+1].cells[0].text = str(k)
-        t_inti.rows[i+1].cells[1].text = str(isi)
-        t_inti.rows[i+1].cells[0].paragraphs[0].runs[0].font.bold = True
+        t_inti.rows[i+1].cells.text = str(k)
+        t_inti.rows[i+1].cells.text = str(isi)
+        t_inti.rows[i+1].cells.paragraphs.runs.font.bold = True
     doc.add_paragraph(); doc.add_paragraph()
     
     doc.add_heading("III. PENGESAHAN", level=2)
     ttd = doc.add_table(rows=1, cols=2)
-    for cell in ttd.rows[0].cells:
+    for cell in ttd.rows.cells:
         cell._tc.get_or_add_tcPr().append(parse_xml(r'<w:tcBorders {}><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders>'.format(nsdecls('w'))))
-    ttd.rows[0].cells[0].paragraphs[0].text = f"Mengetahui,\nKepala Sekolah {data.get('sekolah', '')}\n\n\n\n\n( _______________________ )"
-    ttd.rows[0].cells[1].paragraphs[0].text = f"Guru Mata Pelajaran,\n\n\n\n\n\n( {data.get('guru', '')} )"
+    ttd.rows.cells.paragraphs.text = f"Mengetahui,\nKepala Sekolah {data.get('sekolah', '')}\n\n\n\n\n( _______________________ )"
+    ttd.rows.cells.paragraphs.text = f"Guru Mata Pelajaran,\n\n\n\n\n\n( {data.get('guru', '')} )"
     
     stream = io.BytesIO(); doc.save(stream); stream.seek(0)
     return stream
 
-# =====================================================================
-# ANTARMUKA WEB STREAMLIT
-# =====================================================================
 st.set_page_config(page_title="Aplikasi Pembuat RPM Cerdas", layout="wide")
 st.title("🤖 Aplikasi Pembuat Rencana Pembelajaran Mendalam (RPM) Berbasis AI")
 
@@ -136,7 +101,6 @@ with col1:
 
 with col2:
     st.subheader("II. Tombol Generator Cerdas AI")
-    st.info("💡 Klik tombol di bawah ini satu per satu untuk mengisi draf RPM secara otomatis.")
     if st.button("✨ 1 & 2. Rumuskan Profil Lulusan & Tujuan (AI)"):
         with st.spinner("AI memproses..."):
             st.session_state.profil_ai = panggil_ai_guru(topik, cp, "Dimensi Profil Lulusan", "Rincikan Keterampilan abad 21.")
@@ -162,9 +126,17 @@ pemanfaatan_digital = st.text_area("6. Pemanfaatan Digital", "Platform kolaboras
 langkah_pembelajaran = st.text_area("7. Langkah Pembelajaran Rinci", st.session_state.langkah_ai if st.session_state.langkah_ai else "Klik tombol AI di atas", height=150)
 asesmen_total = st.text_area("8. Asesmen Pembelajaran & LKM", st.session_state.asesmen_ai if st.session_state.asesmen_ai else "Klik tombol AI di atas", height=150)
 
-rpm_data = {'sekolah': sekolah, 'guru': guru, 'mapel': mapel, 'kelas_semester': kelas_semester, 'alokasi_waktu': alokasi_waktu, 'topik': topik, 'cp': cp, 'dimensi_profil': dimensi_profil, 'tujuan_pembelajaran': tujuan_pembelajaran, 'praktik_pedagogis': praktik_pedagogis, 'lingkungan_belajar': lingkungan_belajar, 'kemitraan_belajar': kemitraan_belajar, 'pemanfaatan_digital': pemanfaatan_digital, 'langkah_pembelajaran': langkah_pembelajaran, 'asesmen_total': asesmen_total }st.markdown("---")
+rpm_data = {
+    'sekolah': sekolah, 'guru': guru, 'mapel': mapel, 'kelas_semester': kelas_semester, 'alokasi_waktu': alokasi_waktu,
+    'topik': topik, 'cp': cp, 'dimensi_profil': dimensi_profil, 'tujuan_pembelajaran': tujuan_pembelajaran,
+    'praktik_pedagogis': praktik_pedagogis, 'lingkungan_belajar': lingkungan_belajar, 'kemitraan_belajar': kemitraan_belajar,
+    'pemanfaatan_digital': pemanfaatan_digital, 'langkah_pembelajaran': langkah_pembelajaran, 'asesmen_total': asesmen_total
+}
+
+st.markdown("---")
 st.subheader("IV. Finalisasi Dokumen RPP")
-try: ile_word_ready = buat_dokumen_rpm(rpm_data)
-st.download_button(label="📥 Unduh Dokumen RPM (.docx)", data=file_word_ready, file_name=f"RPM_Cerdas_{topik.replace(' ', '_')}.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+try:
+    file_word_ready = buat_dokumen_rpm(rpm_data)
+    st.download_button(label="📥 Unduh Dokumen RPM (.docx)", data=file_word_ready, file_name=f"RPM_Cerdas_{topik.replace(' ', '_')}.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 except Exception as e:
-st.error(f"⚠️ Gagal menyiapkan tombol unduh. (Detail: {e})")
+    st.error(f"⚠️ Gagal menyiapkan tombol unduh. (Detail: {e})")
