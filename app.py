@@ -1,9 +1,10 @@
 # ============================================================
-# RPM CERDAS AI v2.2 OFFLINE (FORMAT TABEL WORD RAPI)
-# BAGIAN 1: CONFIG, IMPORTS, & LOGIKA GENERATOR AI
+# RPM CERDAS AI v2.5 ONLINE & COMPREHENSIVE GENERATION
+# BAGIAN 1: CONFIG, LLM INTEGRATION, & CORE LOGIC
 # ============================================================
 
 import io
+import json
 import streamlit as st
 from docx import Document
 from docx.shared import Pt, Inches, RGBColor
@@ -11,9 +12,16 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-# Konfigurasi Halaman Utama
+# Menggunakan pustaka resmi Google GenAI terbaru
+try:
+    from google import genai
+    from google.genai import types
+except ImportError:
+    st.error("Pustaka 'google-genai' belum terinstal. Silakan instal terlebih dahulu menggunakan perintah: pip install google-genai")
+
+# Konfigurasi Halaman Utama Streamlit
 st.set_page_config(
-    page_title="RPM CERDAS AI",
+    page_title="RPM CERDAS AI ONLINE",
     page_icon="📘",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -21,101 +29,107 @@ st.set_page_config(
 
 if "hasil" not in st.session_state:
     st.session_state.hasil = ""
+if "components" not in st.session_state:
+    st.session_state.components = None
 
-if "history" not in st.session_state:
-    st.session_state.history = []
-
-# Styling Tampilan UI
+# Gaya Tampilan Antarmuka (CSS Custom)
 st.markdown("""
 <style>
-.main-title { font-size: 36px; font-weight: bold; color: #1565C0; }
-.sub-title { font-size: 16px; color: #555555; }
+.main-title { font-size: 34px; font-weight: bold; color: #1E3A8A; margin-bottom: 5px; }
+.sub-title { font-size: 15px; color: #4B5563; margin-bottom: 20px; }
 textarea { font-size: 14px !important; }
+.stButton>button { width: 100%; border-radius: 8px; }
 footer { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">📘 RPM CERDAS AI</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Generator RPM Kurikulum Merdeka (Edisi Format Tabel Word Rapi)</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">📘 RPM CERDAS AI v2.5 (Online)</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">Penyusun Rencana Pembelajaran Mendalam Kurikulum Merdeka Terintegrasi Google Gemini AI</div>', unsafe_allow_html=True)
 st.divider()
 
-st.sidebar.title("📘 RPM CERDAS AI")
-menu = st.sidebar.selectbox("Pilih Menu", ["Generator RPM", "Tentang Aplikasi"])
+# Manajemen API Key di Sidebar untuk Akses Publik Gratis
+st.sidebar.title("🔐 Konfigurasi Server AI")
+st.sidebar.markdown(
+    "Aplikasi ini menggunakan **Google Gemini API**. "
+    "Setiap guru dapat memasukkan API Key gratis mereka sendiri untuk mulai menggunakannya secara mandiri."
+)
+
+api_key_input = st.sidebar.text_input(
+    "Masukkan Gemini API Key Anda:",
+    type="password",
+    help="Dapatkan API Key gratis di Google AI Studio (https://google.com)"
+)
+
 st.sidebar.divider()
-st.sidebar.success("Status: Server Offline Ready")
+if api_key_input:
+    st.sidebar.success("Status: API Key Terpasang & Siap Digunakan")
+else:
+    st.sidebar.warning("Status: Menunggu API Key untuk Mengaktifkan Mesin AI")
 
-if menu == "Tentang Aplikasi":
-    st.header("Tentang RPM CERDAS AI")
-    st.write("""
-    Aplikasi ini menyusun Rencana Pembelajaran Mendalam (RPM) lengkap dengan:
-    - Identitas & Identifikasi Pembelajaran
-    - Langkah-langkah (Pendahuluan, Inti, Penutup)
-    - Asesmen Diagnostik, Formatif, Sumatif
-    - LKPD & Rubrik Penilaian Detail
-    - **Ekspor Word Rapi:** Otomatis dikemas dalam tabel berpola profesional.
-    """)
-    st.stop()
+def call_gemini_ai(topik, subtopik, tujuan, cp, api_key):
+    """
+    Menghubungi Google Gemini API untuk menghasilkan komponen Kurikulum Merdeka 
+    secara mendalam, orisinal, dan berbasis HOTS dalam format data JSON terstruktur.
+    """
+    if not api_key:
+        return None
+        
+    try:
+        # Inisialisasi klien dengan SDK google-genai terbaru
+        client = genai.Client(api_key=api_key)
+        
+        prompt_sistem = (
+            "Anda adalah pakar kurikulum dan pengembang perangkat pembelajaran Kurikulum Merdeka "
+            "Kementerian Pendidikan Indonesia. Tugas Anda adalah menganalisis Topik, Subtopik, "
+            "Capaian Pembelajaran (CP), dan Tujuan Pembelajaran yang dikirimkan oleh pengguna, "
+            "lalu menghasilkan rancangan Rencana Pembelajaran Mendalam (RPM) yang komprehensif, "
+            "kontekstual, berorientasi HOTS (High Order Thinking Skills), serta terperinci.\n\n"
+            "Wajib merespons dalam struktur JSON murni dengan key yang tepat seperti contoh di bawah ini tanpa komentar di luar JSON:\n"
+            "{\n"
+            "  \"karakteristik\": \"deskripsi mendalam karakteristik siswa adaptif terhadap topik\",\n"
+            "  \"dimensi\": [\"Dimensi 1 + penjelasan kontekstual\", \"Dimensi 2 + penjelasan\"],\n"
+            "  \"pendahuluan\": [\"langkah 1\", \"langkah 2\", \"langkah 3\", \"langkah 4\"],\n"
+            "  \"inti\": [\"langkah 1 berbasis PBL/HOTS\", \"langkah 2\", \"langkah 3\", \"langkah 4\", \"langkah 5\"],\n"
+            "  \"penutup\": [\"langkah 1\", \"langkah 2\", \"langkah 3\", \"langkah 4\"],\n"
+            "  \"diagnostik\": \"detail teknis instrumen diagnostik awal materi ini\",\n"
+            "  \"formatif\": \"detail rubrik/aktivitas formatif proses diskusi\",\n"
+            "  \"sumatif\": \"detail tugas akhir atau tes esai sumatif\",\n"
+            "  \"lkpd\": [\"soal analisis konsep HOTS\", \"studi kasus nyata\", \"soal problem solving kreatif\"],\n"
+            "  \"rubrik\": [\"rubrik penilaian sikap beserta indikatornya\", \"rubrik pengetahuan\", \"rubrik presentasi\"]\n"
+            "}"
+        )
+        
+        prompt_pengguna = f"""
+        Analisis data pembelajaran berikut:
+        - Topik Utama: {topik}
+        - Sub Topik: {subtopik}
+        - Capaian Pembelajaran (CP): {cp}
+        - Tujuan Pembelajaran: {tujuan}
+        
+        Tolong hasilkan seluruh isian Rencana Pembelajaran Mendalam sesuai format JSON tersebut secara kreatif, lengkap, dan tidak normatif/potong-potong.
+        """
+        
+        response = client.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=prompt_pengguna,
+            config=types.GenerateContentConfig(
+                system_instruction=prompt_sistem,
+                response_mime_type="application/json",
+                temperature=0.3
+            )
+        )
+        
+        # Parse output teks JSON ke objek Python dictionary
+        return json.loads(response.text)
+        
+    except Exception as e:
+        st.error(f"Terjadi kesalahan saat memproses data ke server AI: {str(e)}")
+        return None
 
-def ai_generate_components(topik, subtopik, tujuan):
-    """Mesin penalaran AI internal untuk menyusun komponen pembelajaran."""
-    dimensi = [
-        "Bernalar Kritis (Menganalisis konsep dan memecahkan masalah kontekstual)",
-        "Gotong Royong (Berkolaborasi aktif dalam penugasan kelompok dan presentasi)",
-        "Mandiri (Bertanggung jawab atas proses dan hasil belajar secara personal)"
-    ]
-    
-    langkah = {
-        "pendahuluan": [
-            "Guru membuka kelas dengan salam hangat, berdoa bersama, dan mengecek kehadiran.",
-            f"Apersepsi: Guru mengaitkan materi sebelumnya dengan topik baru yaitu '{topik}'.",
-            f"Pertanyaan Pemantik: 'Pernahkah kalian memperhatikan bagaimana {subtopik} bekerja atau diterapkan dalam kehidupan nyata kita? Apa dampaknya jika hal tersebut tidak ada?'",
-            f"Guru memaparkan tujuan pembelajaran hari ini dan menjelaskan pentingnya menguasai {subtopik}."
-        ],
-        "inti": [
-            f"Orientasi Masalah: Peserta didik mengamati studi kasus nyata atau tayangan visual yang memuat tantangan kontekstual terkait '{topik} ({subtopik})'.",
-            "Pengorganisasian Kelompok: Peserta didik dibagi ke dalam kelompok heterogen (4-5 orang) dan menerima lembar kerja (LKPD).",
-            f"Penyelidikan Terbimbing: Kelompok melakukan literasi digital/buku, berdiskusi, dan mengumpulkan data untuk memecahkan masalah praktis terkait {subtopik}.",
-            "Mengembangkan & Menyajikan Karya: Setiap kelompok menyusun draf solusi atau peta konsep pada LKPD, lalu mempresentasikannya di depan kelas.",
-            f"Analisis & Evaluasi: Guru memberikan konfirmasi, meluruskan miskonsepsi mengenai {topik}, dan memberikan apresiasi atas performa seluruh tim."
-        ],
-        "penutup": [
-            f"Peserta didik dibimbing guru membuat kesimpulan terpadu tentang inti materi {subtopik}.",
-            f"Refleksi Mendalam: Peserta didik menjawab pertanyaan, 'Bagian mana dari konsep {topik} yang paling menantang dan bagaimana Anda akan menerapkannya?'",
-            "Guru memberikan umpan balik positif serta menginformasikan rencana materi pertemuan berikutnya.",
-            "Pembelajaran diakhiri dengan doa syukur dan salam penutup."
-        ]
-    }
-    
-    asesmen = {
-        "diagnostik": f"Asesmen Kognitif Awal melalui kuis singkat 3 pertanyaan atau curah pendapat kilat mengenai pengetahuan dasar {topik}.",
-        "formatif": f"Observasi proses diskusi kelompok, penilaian keaktifan, dan penilaian performa saat mempresentasikan LKPD {subtopik}.",
-        "sumatif": f"Tes tertulis objektif/esai di akhir unit atau penilaian produk laporan solusi kontekstual mengenai {topik}."
-    }
-    
-    lkpd_tasks = [
-        f"[Pemahaman Konsep] Analisis secara mendalam hubungan kausalitas antara '{topik}' dengan sub-materi '{subtopik}' berdasarkan literatur yang Anda temukan!",
-        f"[Studi Kasus Nyata] Temukan satu fenomena konkret di lingkungan sekitar Anda yang berkaitan dengan {subtopik}. Jelaskan mekanisme terjadinya secara ilmiah!",
-        f"[Problem Solving & Inovasi] Jika ditemukan kegagalan sistem atau masalah implementasi pada {topik} dalam kehidupan sehari-hari, formulasikan 2 solusi kreatif kelompok Anda!"
-    ]
-    
-    rubrik = [
-        "Sikap (Profil Pelajar Pancasila): Skor 1-4 untuk indikator Bernalar Kritis dan Gotong Royong selama dinamika kelompok.",
-        "Pengetahuan (LKPD): Skor maksimal 100 dinilai berdasarkan kedalaman analisis, orisinalitas argumen, dan ketepatan teori.",
-        "Keterampilan (Presentasi): Skor 1-4 berpatokan pada kejelasan artikulasi, sistematika penyampaian, dan kemampuan mempertahankan argumentasi saat tanya jawab."
-    ]
-    
-    return dimensi, langkah, asesmen, lkpd_tasks, rubrik
-
-def generate_rpm_document(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, karakteristik, tujuan):
-    if not karakteristik.strip():
-        karakter = f"Peserta didik kelas {kelas} memiliki profil belajar yang variatif dengan kesiapan yang beragam. Sebagian besar memerlukan visualisasi konkret sebelum memahami abstraksi teori {topik}. Pembelajaran diakomodasi melalui diferensiasi proses dan konten."
-    else:
-        karakter = karakteristik
-
-    dimensi, langkah, asesmen, lkpd_tasks, rubrik = ai_generate_components(topik, subtopik, tujuan)
-
+def generate_text_preview(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, tujuan, data_ai):
+    """Membuat format teks mentah untuk pratinjau langsung di layar aplikasi."""
     hasil = f"""============================================================
-RENCANA PEMBELAJARAN MENDALAM (RPM)
+RENCANA PEMBELAJARAN MENDALAM (RPM) - FORMULASI AI
 ============================================================
 
 A. IDENTITAS PEMBELAJARAN
@@ -135,12 +149,12 @@ Capaian (CP)      : {cp}
 
 ============================================================
 C. KARAKTERISTIK PESERTA DIDIK
-{karakter}
+{data_ai.get('karakteristik', '')}
 
 ============================================================
-D. DIMENSI PROFIL LULUSAN
+D. DIMENSI PROFIL PELAJAR PANCASILA
 """
-    for d in dimensi:
+    for d in data_ai.get('dimensi', []):
         hasil += f"• {d}\n"
 
     hasil += f"""
@@ -149,45 +163,45 @@ E. TUJUAN PEMBELAJARAN
 {tujuan}
 
 ============================================================
-F. LANGKAH-LANGKAH PEMBELAJARAN
+F. LANGKAH-LANGKAH PEMBELAJARAN (MODEL AKTIF/HOTS)
 1. KEGIATAN PENDAHULUAN (15 Menit)
 """
-    for p in langkah["pendahuluan"]:
+    for p in data_ai.get('pendahuluan', []):
         hasil += f"• {p}\n"
 
     hasil += "\n2. KEGIATAN INTI (50 Menit)\n"
-    for i in langkah["inti"]:
+    for i in data_ai.get('inti', []):
         hasil += f"• {i}\n"
 
     hasil += "\n3. KEGIATAN PENUTUP (15 Menit)\n"
-    for pen in langkah["penutup"]:
+    for pen in data_ai.get('penutup', []):
         hasil += f"• {pen}\n"
 
     hasil += f"""
 ============================================================
-G. ASESMEN PEMBELAJARAN
-• Diagnostik : {asesmen["diagnostik"]}
-• Formatif   : {asesmen["formatif"]}
-• Sumatif    : {asesmen["sumatif"]}
+G. ASESMEN TRI-PARTIT
+• Diagnostik : {data_ai.get('diagnostik', '')}
+• Formatif   : {data_ai.get('formatif', '')}
+• Sumatif    : {data_ai.get('sumatif', '')}
 
 ============================================================
 H. LEMBAR KERJA PESERTA DIDIK (LKPD)
 Mata Pelajaran : {mapel}
 Topik          : {topik} ({subtopik})
 
-TUGAS / PERTANYAAN DISKUSI:
+SOAL / AKTIVITAS DISKUSI:
 """
-    for idx, task in enumerate(lkpd_tasks, 1):
+    for idx, task in enumerate(data_ai.get('lkpd', []), 1):
         hasil += f"{idx}. {task}\n"
 
     hasil += "\n============================================================\nI. RUBRIK PENILAIAN\n"
-    for r in rubrik:
+    for r in data_ai.get('rubrik', []):
         hasil += f"• {r}\n"
 
     return hasil
 # ============================================================
-# RPM CERDAS AI v2.2 OFFLINE (FORMAT TABEL WORD RAPI)
-# BAGIAN 2: LOGIKA INTEGRASI FORMAT TABEL WORD (.DOCX)
+# RPM CERDAS AI v2.5 ONLINE & COMPREHENSIVE GENERATION
+# BAGIAN 2: WORD EXPORTER (TERMASUK TABEL TANDA TANGAN RAPI)
 # ============================================================
 
 def set_cell_background(cell, fill_color):
@@ -210,17 +224,18 @@ def add_header_row(table, headers, fill_color="1565C0"):
             run.font.bold = True
             run.font.color.rgb = RGBColor(255, 255, 255)
 
-def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, karakteristik, tujuan):
+def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, tujuan, data_ai, nama_kepsek, nip_kepsek, nip_guru, tempat_tanggal):
+    """Menyusun seluruh komponen hasil analisis AI ke dalam dokumen Microsoft Word berbasis tabel."""
     doc = Document()
     
-    # Margin Dokumen (Normal)
+    # Konfigurasi Margin Halaman Dokumen
     for section in doc.sections:
         section.top_margin = Inches(1)
         section.bottom_margin = Inches(1)
         section.left_margin = Inches(1)
         section.right_margin = Inches(1)
 
-    # Judul Dokumen
+    # JUDUL UTAMA DOKUMEN
     title = doc.add_heading(level=0)
     run_title = title.add_run("RENCANA PEMBELAJARAN MENDALAM (RPM)")
     run_title.font.size = Pt(18)
@@ -228,10 +243,8 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
     run_title.font.color.rgb = RGBColor(21, 101, 192)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    dimensi, langkah, asesmen, lkpd_tasks, rubrik = ai_generate_components(topik, subtopik, tujuan)
-    
     if not karakteristik.strip():
-        karakter = f"Peserta didik kelas {kelas} memiliki ragam kesiapan belajar yang bervariasi. Pembelajaran didesain menggunakan pendekatan diferensiasi berbasis konten dan proses guna memaksimalkan internalisasi konsep {topik}."
+        karakter = f"Peserta didik kelas {kelas} memiliki profil belajar variatif. Pembelajaran diakomodasi melalui diferensiasi proses berbasis pemecahan masalah konkret terhadap materi {topik}."
     else:
         karakter = karakteristik
 
@@ -250,7 +263,7 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
         ("Topik Utama", topik),
         ("Sub Topik", subtopik),
         ("Capaian Pembelajaran", cp),
-        ("Karakteristik Siswa", karakter)
+        ("Karakteristik Siswa (AI)", data_ai.get('karakteristik', ''))
     ]
     
     for idx, (label, val) in enumerate(data_id):
@@ -262,15 +275,15 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
 
     doc.add_paragraph()
 
-    # --- 2. TABEL PROFIL & TUJUAN ---
-    doc.add_heading("II. ORIENTASI PROFIL & TUJUAN", level=2)
+    # --- 2. TABEL PROFIL LULUSAN & TUJUAN ---
+    doc.add_heading("II. ORIENTASI PROFIL & TUJUAN PEMBELAJARAN", level=2)
     table_goal = doc.add_table(rows=2, cols=2)
     table_goal.style = "Table Grid"
     add_header_row(table_goal, ["Dimensi Profil Pelajar Pancasila", "Tujuan Pembelajaran Sesuai Target"])
     
     row_g = table_goal.rows[1]
     p_dim = row_g.cells[0].paragraphs[0]
-    for d in dimensi:
+    for d in data_ai.get('dimensi', []):
         p_dim.add_run(f"• {d}\n")
     row_g.cells[1].text = tujuan
 
@@ -282,127 +295,196 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
     table_steps.style = "Table Grid"
     add_header_row(table_steps, ["Tahap Kegiatan", "Durasi", "Detail Aktivitas Berbasis AI"])
     
-    # Pendahuluan
+    # Kegiatan Pendahuluan
     r_pend = table_steps.rows[1]
     r_pend.cells[0].text = "Kegiatan Pendahuluan"
     r_pend.cells[1].text = "15 Menit"
     p_pend = r_pend.cells[2].paragraphs[0]
-    for p in langkah["pendahuluan"]:
+    for p in data_ai.get('pendahuluan', []):
         p_pend.add_run(f"• {p}\n")
         
-    # Inti
+    # Kegiatan Inti
     r_inti = table_steps.rows[2]
     r_inti.cells[0].text = "Kegiatan Inti (Model HOTS/PBL)"
     r_inti.cells[1].text = "50 Menit"
     p_inti = r_inti.cells[2].paragraphs[0]
-    for i in langkah["inti"]:
+    for i in data_ai.get('inti', []):
         p_inti.add_run(f"• {i}\n")
         
-    # Penutup
+    # Kegiatan Penutup
     r_pen = table_steps.rows[3]
     r_pen.cells[0].text = "Kegiatan Penutup & Refleksi"
     r_pen.cells[1].text = "15 Menit"
     p_pen = r_pen.cells[2].paragraphs[0]
-    for pen in langkah["penutup"]:
+    for pen in data_ai.get('penutup', []):
         p_pen.add_run(f"• {pen}\n")
 
     doc.add_paragraph()
 
-    # --- 4. TABEL EVALUASI, LKPD & RUBRIK ---
+    # --- 4. TABEL EVALUASI, LKPD, & RUBRIK ---
     doc.add_heading("IV. EVALUASI, LKPD, & RUBRIK PENILAIAN OBJEKTIF", level=2)
     table_eval = doc.add_table(rows=4, cols=2)
     table_eval.style = "Table Grid"
     add_header_row(table_eval, ["Komponen Evaluasi", "Rancangan Dokumen Pokok"])
     
+    # Asesmen
     r_as = table_eval.rows[1]
     r_as.cells[0].text = "Asesmen Tripartit"
     r_as.cells[0].paragraphs[0].runs[0].font.bold = True
-    r_as.cells[1].text = f"1. Diagnostik: {asesmen['diagnostik']}\n2. Formatif: {asesmen['formatif']}\n3. Sumatif: {asesmen['sumatif']}"
+    r_as.cells[1].text = f"1. Diagnostik: {data_ai.get('diagnostik', '')}\n\n2. Formatif: {data_ai.get('formatif', '')}\n\n3. Sumatif: {data_ai.get('sumatif', '')}"
     
+    # LKPD
     r_lk = table_eval.rows[2]
-    r_lk.cells[0].text = f"Lembar Kerja Peserta Didik (LKPD)"
+    r_lk.cells[0].text = "Lembar Kerja Siswa (LKPD)"
     r_lk.cells[0].paragraphs[0].runs[0].font.bold = True
     p_lk = r_lk.cells[1].paragraphs[0]
-    for idx, task in enumerate(lkpd_tasks, 1):
-        p_lk.add_run(f"{idx}. {task}\n")
+    for idx, task in enumerate(data_ai.get('lkpd', []), 1):
+        p_lk.add_run(f"{idx}. {task}\n\n")
         
+    # Rubrik
     r_rb = table_eval.rows[3]
     r_rb.cells[0].text = "Rubrik Penilaian Kinerja"
     r_rb.cells[0].paragraphs[0].runs[0].font.bold = True
     p_rb = r_rb.cells[1].paragraphs[0]
-    for r in rubrik:
-        p_rb.add_run(f"• {r}\n")
+    for r in data_ai.get('rubrik', []):
+        p_rb.add_run(f"• {r}\n\n")
+
+    doc.add_paragraph()
+    doc.add_paragraph()
+
+    # --- 5. BAGIAN TANDA TANGAN (MENGGUNAKAN TABEL TANPA GARIS BORDER) ---
+    table_ttd = doc.add_table(rows=3, cols=2)
+    table_ttd.style = "Table Grid" 
+    
+    # Menghilangkan border agar tampak bersih seperti ketikan manual biasa
+    for row in table_ttd.rows:
+        for cell in row.cells:
+            tcPr = cell._element.get_or_add_tcPr()
+            tcBorders = OxmlElement('w:tcBorders')
+            for border_name in ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']:
+                border = OxmlElement(f'w:{border_name}')
+                border.set(qn('w:val'), 'none')
+                tcBorders.append(border)
+            tcPr.append(tcBorders)
+
+    # Baris 1: Tempat, Tanggal Dokumen
+    cell_tgl = table_ttd.rows[0].cells[1]
+    p_tgl = cell_tgl.paragraphs[0]
+    p_tgl.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    p_tgl.add_run(f"{tempat_tanggal}\n")
+
+    # Baris 2: Jabatan
+    cell_jabatan_kepsek = table_ttd.rows[1].cells[0]
+    p_jkep = cell_jabatan_kepsek.paragraphs[0]
+    p_jkep.add_run("Mengetahui,\nKepala Sekolah\n\n\n\n")
+    
+    cell_jabatan_guru = table_ttd.rows[1].cells[1]
+    p_jguru = cell_jabatan_guru.paragraphs[0]
+    p_jguru.add_run("Guru Mata Pelajaran\n\n\n\n")
+
+    # Baris 3: Nama Lengkap & NIP
+    cell_nama_kepsek = table_ttd.rows[2].cells[0]
+    p_nkep = cell_nama_kepsek.paragraphs[0]
+    run_nkep = p_nkep.add_run(nama_kepsek)
+    run_nkep.font.underline = True
+    run_nkep.font.bold = True
+    p_nkep.add_run(f"\nNIP. {nip_kepsek if nip_kepsek else '-'}")
+
+    cell_nama_guru = table_ttd.rows[2].cells[1]
+    p_nguru = cell_nama_guru.paragraphs[0]
+    run_nguru = p_nguru.add_run(guru)
+    run_nguru.font.underline = True
+    run_nguru.font.bold = True
+    p_nguru.add_run(f"\nNIP. {nip_guru if nip_guru else '-'}")
 
     bio = io.BytesIO()
     doc.save(bio)
     bio.seek(0)
     return bio
 # ============================================================
-# RPM CERDAS AI v2.2 OFFLINE (FORMAT TABEL WORD RAPI)
-# BAGIAN 3: FORM INPUT PARAMETER DAN INTERFACES STREAMLIT
+# RPM CERDAS AI v2.5 ONLINE & COMPREHENSIVE GENERATION
+# BAGIAN 3: FORM INPUT PARAMETER DAN INTERFACES + FITUR ADMINISTRASI
 # ============================================================
 
 st.header("⚙️ Form Parameter & Input Rencana Pembelajaran")
-st.write("Silakan isi data identitas pokok, topik, dan tujuan pembelajaran di bawah ini:")
+st.write("Silakan lengkapi identitas pokok kurikulum, topik utama, serta target capaian pembelajaran Anda:")
 
-col1, col2, col3 = st.columns(3)
+# Pembagian Tab agar Input Administrasi Tanda Tangan Terpisah Rapi
+tab_identitas, tab_ttd_admin = st.tabs(["📝 Identitas Pembelajaran", "✍️ Pengesahan & Tanda Tangan"])
 
-with col1:
-    sekolah = st.text_input("Nama Sekolah", value="SMA Negeri 1 Pembelajaran")
-    guru = st.text_input("Nama Guru", value="Ahmad Sucipto, S.Pd.")
-    tahun = st.text_input("Tahun Pelajaran", value="2026/2027")
+with tab_identitas:
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        sekolah = st.text_input("Nama Sekolah", value="SMA Negeri 1 Pembelajaran")
+        guru = st.text_input("Nama Guru & Gelar *", value="Ahmad Sucipto, S.Pd.")
+        tahun = st.text_input("Tahun Pelajaran", value="2026/2027")
+    with col2:
+        mapel = st.text_input("Mata Pelajaran", value="Informatika / Sains Terpadu")
+        kelas = st.text_input("Kelas / Rombel", value="X-A")
+        fase = st.text_input("Fase Kurikulum", value="E")
+    with col3:
+        semester = st.selectbox("Semester", ["1 (Ganjil)", "2 (Genap)"])
+        alokasi = st.text_input("Alokasi Waktu Efektif", value="2 JP x 45 Menit")
 
-with col2:
-    mapel = st.text_input("Mata Pelajaran", value="Informatika / Sains Terpadu")
-    kelas = st.text_input("Kelas / Rombel", value="X-A")
-    fase = st.text_input("Fase", value="E")
+    st.divider()
 
-with col3:
-    semester = st.selectbox("Semester", ["1 (Ganjil)", "2 (Genap)"])
-    alokasi = st.text_input("Alokasi Waktu", value="2 JP x 45 Menit")
+    col_topik, col_tujuan = st.columns(2)
+    with col_topik:
+        topik = st.text_input("Topik Utama (Materi Pokok) *", value="Kecerdasan Buatan (AI)")
+        subtopik = st.text_input("Sub Topik Bahasan *", value="Penerapan LLM dalam Pendidikan")
+        cp = st.text_area("Capaian Pembelajaran (CP) Resmi *", value="Peserta didik mampu memahami perkembangan teknologi terkini, menganalisis dampak pemanfaatan tools AI secara bijak, dan merancang solusi penyelesaian masalah sehari-hari menggunakan konsep komputasi modern.")
+
+    with col_tujuan:
+        tujuan = st.text_area(
+            "Tujuan Pembelajaran Target Kurikulum * (Gunakan penomoran)",
+            value="1. Menjelaskan konsep dasar Large Language Model (LLM) dengan bahasanya sendiri secara runtut.\n2. Menganalisis keuntungan dan batasan etis penggunaan AI dalam menyusun materi belajar.\n3. Berkolaborasi dalam kelompok kecil untuk merumuskan petunjuk penggunaan AI yang aman di sekolah."
+        )
+
+with tab_ttd_admin:
+    st.write("Sesuaikan data penandatanganan dokumen perangkat pembelajaran untuk lembar pengesahan:")
+    col_admin1, col_admin2 = st.columns(2)
+    
+    with col_admin1:
+        tempat_tanggal = st.text_input("Tempat, Tanggal Dokumen", value="Jakarta, 17 Juli 2026")
+        nama_kepsek = st.text_input("Nama Kepala Sekolah & Gelar", value="Dr. H. Supriadi, M.Pd.")
+        nip_kepsek = st.text_input("NIP Kepala Sekolah (Kosongkan jika tidak ada)", value="19750824 200003 1 002")
+        
+    with col_admin2:
+        st.write("") # Spacer kilat
+        st.write("") 
+        nip_guru = st.text_input("NIP Guru Mata Pelajaran (Kosongkan jika tidak ada)", value="19891210 201504 2 003")
 
 st.divider()
 
-col_topik, col_tujuan = st.columns(2)
-
-with col_topik:
-    topik = st.text_input("Topik Utama *", value="Kecerdasan Buatan (AI)")
-    subtopik = st.text_input("Sub Topik *", value="Penerapan LLM dalam Pendidikan")
-    cp = st.text_area("Capaian Pembelajaran (CP)", value="Peserta didik mampu memahami perkembangan teknologi terkini, menganalisis dampak pemanfaatan tools AI secara bijak, dan merancang solusi penyelesaian masalah sehari-hari menggunakan konsep komputasi modern.")
-    karakteristik = st.text_area("Karakteristik Siswa (Opsional - Biarkan kosong agar diisi otomatis oleh AI)", value="")
-
-with col_tujuan:
-    tujuan = st.text_area(
-        "Tujuan Pembelajaran * (Tulis per baris atau gunakan penomoran)",
-        value="1. Menjelaskan konsep dasar Large Language Model (LLM) dengan bahasanya sendiri secara runtut.\n2. Menganalisis keuntungan dan batasan etis penggunaan AI dalam menyusun materi belajar.\n3. Berkolaborasi dalam kelompok kecil untuk merumuskan petunjuk penggunaan AI yang aman di sekolah."
-    )
-
-st.divider()
-
-# Aksi saat tombol ditekan
-if st.button("🚀 Susun Rencana Pembelajaran Mendalam (AI)", type="primary"):
-    if not topik.strip() or not subtopik.strip() or not tujuan.strip():
-        st.error("Gagal! Kolom Topik Utama, Sub Topik, dan Tujuan Pembelajaran wajib diisi.")
+if st.button("🚀 Hubungkan ke Server AI & Formulasikan Perangkat Pembelajaran", type="primary"):
+    if not api_key_input:
+        st.error("Proses Dihentikan! Silakan masukkan Google Gemini API Key Anda di panel sebelah kiri terlebih dahulu untuk dapat menggunakan fasilitas pencarian kecerdasan AI.")
+    elif not topik.strip() or not subtopik.strip() or not tujuan.strip() or not cp.strip() or not guru.strip():
+        st.error("Gagal! Kolom bertanda (*) seperti Nama Guru, Topik Utama, Sub Topik, CP, dan Tujuan Pembelajaran wajib diisi.")
     else:
-        with st.spinner("AI sedang menganalisis tujuan pembelajaran dan menyusun materi pendukung..."):
-            # Buat teks pratinjau
-            st.session_state.hasil = generate_rpm_document(
-                sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, karakteristik, tujuan
-            )
-            # Buat binary file Word format tabel
-            st.session_state.word_file = export_word(
-                sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, karakteristik, tujuan
-            )
-            st.success("Selesai! RPM Berhasil dihasilkan secara komprehensif.")
+        with st.spinner("Mesin kecerdasan buatan sedang melakukan penalaran kurikulum mendalam dan menyelaraskan instrumen evaluasi..."):
+            components = call_gemini_ai(topik, subtopik, tujuan, cp, api_key_input)
+            
+            if components:
+                st.session_state.components = components
+                st.session_state.hasil = generate_text_preview(
+                    sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, tujuan, components
+                )
+                st.success("Berhasil! Seluruh komponen pembelajaran prasyarat telah dirumuskan secara otentik.")
 
-# Tampilkan hasil jika data sudah digenerate
-if st.session_state.hasil:
+if st.session_state.hasil and st.session_state.components:
     st.header("📄 Pratinjau Dokumen Hasil Formulasi AI")
-    st.text_area("Preview Output Teks", value=st.session_state.hasil, height=450)
+    st.text_area("Preview Output Analisis Teks", value=st.session_state.hasil, height=400)
+    
+    # Proses pembuatan file Word dengan parameter tambahan Tanda Tangan
+    word_file = export_word(
+        sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, tujuan, 
+        st.session_state.components, nama_kepsek, nip_kepsek, nip_guru, tempat_tanggal
+    )
     
     st.download_button(
-        label="📥 Unduh Dokumen RPM (Format Tabel Word .docx)",
-        data=st.session_state.word_file,
-        file_name=f"RPM_Mendalam_{topik.replace(' ', '_')}.docx",
+        label="📥 Unduh Dokumen RPM Hasil AI (Format Tabel Word .docx)",
+        data=word_file,
+        file_name=f"RPM_Mendalam_AI_{topik.replace(' ', '_')}.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
