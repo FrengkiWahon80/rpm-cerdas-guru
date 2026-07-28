@@ -201,7 +201,7 @@ SOAL / AKTIVITAS DISKUSI:
     return hasil
 # ============================================================
 # RPM CERDAS AI v2.5 ONLINE & COMPREHENSIVE GENERATION
-# BAGIAN 2: WORD EXPORTER (KOREKSI DATA TUPLE SEL)
+# BAGIAN 2: WORD EXPORTER (PERBAIKAN TOTAL INDEKS KOLOM TABEL)
 # ============================================================
 
 def set_cell_background(cell, fill_color):
@@ -349,9 +349,8 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
     doc.add_paragraph()
     doc.add_paragraph()
 
-    # --- 5. BAGIAN TANDA TANGAN (KOREKSI INDEKS) ---
+    # --- 5. BAGIAN TANDA TANGAN (KOREKSI TOTAL INDEKS KOLOM) ---
     table_ttd = doc.add_table(rows=3, cols=2)
-    table_ttd.style = "Table Grid" 
     
     # Sembunyikan garis pinggir tabel tanda tangan
     for row in table_ttd.rows:
@@ -364,7 +363,7 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
                 tcBorders.append(border)
             tcPr.append(tcBorders)
 
-    # Baris 1: Tempat & Tanggal Dokumen (Diletakkan di sisi kanan atas tanda tangan)
+    # Baris 1: Tempat & Tanggal Dokumen (Di kolom kanan/guru)
     table_ttd.rows[0].cells[1].text = f"{tempat_tanggal}\n"
 
     # Baris 2: Struktur Jabatan Pemangku Kepentingan
