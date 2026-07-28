@@ -201,7 +201,7 @@ SOAL / AKTIVITAS DISKUSI:
     return hasil
 # ============================================================
 # RPM CERDAS AI v2.5 ONLINE & COMPREHENSIVE GENERATION
-# BAGIAN 2: WORD EXPORTER (TERMASUK TABEL TANDA TANGAN RAPI)
+# BAGIAN 2: WORD EXPORTER (KOREKSI DATA TUPLE SEL)
 # ============================================================
 
 def set_cell_background(cell, fill_color):
@@ -243,10 +243,7 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
     run_title.font.color.rgb = RGBColor(21, 101, 192)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    if not karakteristik.strip():
-        karakter = f"Peserta didik kelas {kelas} memiliki profil belajar variatif. Pembelajaran diakomodasi melalui diferensiasi proses berbasis pemecahan masalah konkret terhadap materi {topik}."
-    else:
-        karakter = karakteristik
+    karakter = data_ai.get('karakteristik', f"Peserta didik kelas {kelas} memiliki profil belajar variatif.")
 
     # --- 1. TABEL IDENTITAS ---
     doc.add_heading("I. IDENTITAS & IDENTIFIKASI PEMBELAJARAN", level=2)
@@ -263,7 +260,7 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
         ("Topik Utama", topik),
         ("Sub Topik", subtopik),
         ("Capaian Pembelajaran", cp),
-        ("Karakteristik Siswa (AI)", data_ai.get('karakteristik', ''))
+        ("Karakteristik Siswa (AI)", karakter)
     ]
     
     for idx, (label, val) in enumerate(data_id):
@@ -314,7 +311,7 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
     # Kegiatan Penutup
     r_pen = table_steps.rows[3]
     r_pen.cells[0].text = "Kegiatan Penutup & Refleksi"
-    r_pen.cells[1].text = "15 Menit"
+    r_pen.cells.text = "15 Menit"
     p_pen = r_pen.cells[2].paragraphs[0]
     for pen in data_ai.get('penutup', []):
         p_pen.add_run(f"• {pen}\n")
@@ -352,11 +349,11 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
     doc.add_paragraph()
     doc.add_paragraph()
 
-    # --- 5. BAGIAN TANDA TANGAN (MENGGUNAKAN TABEL TANPA GARIS BORDER) ---
+    # --- 5. BAGIAN TANDA TANGAN (KOREKSI INDEKS) ---
     table_ttd = doc.add_table(rows=3, cols=2)
     table_ttd.style = "Table Grid" 
     
-    # Menghilangkan border agar tampak bersih seperti ketikan manual biasa
+    # Sembunyikan garis pinggir tabel tanda tangan
     for row in table_ttd.rows:
         for cell in row.cells:
             tcPr = cell._element.get_or_add_tcPr()
@@ -367,31 +364,21 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
                 tcBorders.append(border)
             tcPr.append(tcBorders)
 
-    # Baris 1: Tempat, Tanggal Dokumen
-    cell_tgl = table_ttd.rows[0].cells[1]
-    p_tgl = cell_tgl.paragraphs[0]
-    p_tgl.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    p_tgl.add_run(f"{tempat_tanggal}\n")
+    # Baris 1: Tempat & Tanggal Dokumen (Diletakkan di sisi kanan atas tanda tangan)
+    table_ttd.rows[0].cells[1].text = f"{tempat_tanggal}\n"
 
-    # Baris 2: Jabatan
-    cell_jabatan_kepsek = table_ttd.rows[1].cells[0]
-    p_jkep = cell_jabatan_kepsek.paragraphs[0]
-    p_jkep.add_run("Mengetahui,\nKepala Sekolah\n\n\n\n")
-    
-    cell_jabatan_guru = table_ttd.rows[1].cells[1]
-    p_jguru = cell_jabatan_guru.paragraphs[0]
-    p_jguru.add_run("Guru Mata Pelajaran\n\n\n\n")
+    # Baris 2: Struktur Jabatan Pemangku Kepentingan
+    table_ttd.rows[1].cells[0].text = "Mengetahui,\nKepala Sekolah\n\n\n\n"
+    table_ttd.rows[1].cells[1].text = "Guru Mata Pelajaran\n\n\n\n"
 
-    # Baris 3: Nama Lengkap & NIP
-    cell_nama_kepsek = table_ttd.rows[2].cells[0]
-    p_nkep = cell_nama_kepsek.paragraphs[0]
+    # Baris 3: Nama Lengkap Pejabat & Guru + Format NIP
+    p_nkep = table_ttd.rows[2].cells[0].paragraphs[0]
     run_nkep = p_nkep.add_run(nama_kepsek)
     run_nkep.font.underline = True
     run_nkep.font.bold = True
     p_nkep.add_run(f"\nNIP. {nip_kepsek if nip_kepsek else '-'}")
 
-    cell_nama_guru = table_ttd.rows[2].cells[1]
-    p_nguru = cell_nama_guru.paragraphs[0]
+    p_nguru = table_ttd.rows[2].cells[1].paragraphs[0]
     run_nguru = p_nguru.add_run(guru)
     run_nguru.font.underline = True
     run_nguru.font.bold = True
@@ -403,13 +390,13 @@ def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, top
     return bio
 # ============================================================
 # RPM CERDAS AI v2.5 ONLINE & COMPREHENSIVE GENERATION
-# BAGIAN 3: FORM INPUT PARAMETER DAN INTERFACES + FITUR ADMINISTRASI
+# BAGIAN 3: USER INTERFACE & DOWNLOAD STATE MANAGEMENT
 # ============================================================
 
 st.header("⚙️ Form Parameter & Input Rencana Pembelajaran")
 st.write("Silakan lengkapi identitas pokok kurikulum, topik utama, serta target capaian pembelajaran Anda:")
 
-# Pembagian Tab agar Input Administrasi Tanda Tangan Terpisah Rapi
+# Pengelompokan Data Input Melalui Sistem Tab yang Rapi
 tab_identitas, tab_ttd_admin = st.tabs(["📝 Identitas Pembelajaran", "✍️ Pengesahan & Tanda Tangan"])
 
 with tab_identitas:
@@ -441,28 +428,28 @@ with tab_identitas:
         )
 
 with tab_ttd_admin:
-    st.write("Sesuaikan data penandatanganan dokumen perangkat pembelajaran untuk lembar pengesahan:")
+    st.write("Sesuaikan data dokumen penandatanganan untuk lembar pengesahan paling bawah:")
     col_admin1, col_admin2 = st.columns(2)
     
     with col_admin1:
         tempat_tanggal = st.text_input("Tempat, Tanggal Dokumen", value="Jakarta, 17 Juli 2026")
         nama_kepsek = st.text_input("Nama Kepala Sekolah & Gelar", value="Dr. H. Supriadi, M.Pd.")
-        nip_kepsek = st.text_input("NIP Kepala Sekolah (Kosongkan jika tidak ada)", value="19750824 200003 1 002")
+        nip_kepsek = st.text_input("NIP Kepala Sekolah (Isi '-' jika tidak ada)", value="19750824 200003 1 002")
         
     with col_admin2:
-        st.write("") # Spacer kilat
+        st.write("") # Spacer Layout
         st.write("") 
-        nip_guru = st.text_input("NIP Guru Mata Pelajaran (Kosongkan jika tidak ada)", value="19891210 201504 2 003")
+        nip_guru = st.text_input("NIP Guru Mata Pelajaran (Isi '-' jika tidak ada)", value="19891210 201504 2 003")
 
 st.divider()
 
 if st.button("🚀 Hubungkan ke Server AI & Formulasikan Perangkat Pembelajaran", type="primary"):
     if not api_key_input:
-        st.error("Proses Dihentikan! Silakan masukkan Google Gemini API Key Anda di panel sebelah kiri terlebih dahulu untuk dapat menggunakan fasilitas pencarian kecerdasan AI.")
+        st.error("Proses Dihentikan! Silakan masukkan Google Gemini API Key Anda di panel sebelah kiri terlebih dahulu.")
     elif not topik.strip() or not subtopik.strip() or not tujuan.strip() or not cp.strip() or not guru.strip():
-        st.error("Gagal! Kolom bertanda (*) seperti Nama Guru, Topik Utama, Sub Topik, CP, dan Tujuan Pembelajaran wajib diisi.")
+        st.error("Gagal! Kolom bertanda (*) wajib diisi lengkap.")
     else:
-        with st.spinner("Mesin kecerdasan buatan sedang melakukan penalaran kurikulum mendalam dan menyelaraskan instrumen evaluasi..."):
+        with st.spinner("Mesin kecerdasan buatan sedang memformulasikan komponen kurikulum..."):
             components = call_gemini_ai(topik, subtopik, tujuan, cp, api_key_input)
             
             if components:
@@ -470,21 +457,25 @@ if st.button("🚀 Hubungkan ke Server AI & Formulasikan Perangkat Pembelajaran"
                 st.session_state.hasil = generate_text_preview(
                     sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, tujuan, components
                 )
-                st.success("Berhasil! Seluruh komponen pembelajaran prasyarat telah dirumuskan secara otentik.")
+                st.success("Berhasil! Seluruh instrumen pembelajaran selesai dirumuskan.")
 
+# Proteksi rendering tombol unduh agar tidak memicu error tuple
 if st.session_state.hasil and st.session_state.components:
     st.header("📄 Pratinjau Dokumen Hasil Formulasi AI")
     st.text_area("Preview Output Analisis Teks", value=st.session_state.hasil, height=400)
     
-    # Proses pembuatan file Word dengan parameter tambahan Tanda Tangan
-    word_file = export_word(
-        sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, tujuan, 
-        st.session_state.components, nama_kepsek, nip_kepsek, nip_guru, tempat_tanggal
-    )
-    
-    st.download_button(
-        label="📥 Unduh Dokumen RPM Hasil AI (Format Tabel Word .docx)",
-        data=word_file,
-        file_name=f"RPM_Mendalam_AI_{topik.replace(' ', '_')}.docx",
-        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
+    try:
+        # Konversi data ke format binary .docx dengan parameter ttd yang sudah diperbaiki
+        word_file = export_word(
+            sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, tujuan, 
+            st.session_state.components, nama_kepsek, nip_kepsek, nip_guru, tempat_tanggal
+        )
+        
+        st.download_button(
+            label="📥 Unduh Dokumen RPM Hasil AI (Format Tabel Word .docx)",
+            data=word_file,
+            file_name=f"RPM_Mendalam_AI_{topik.replace(' ', '_')}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+    except Exception as e:
+        st.error(f"Gagal menyiapkan tombol unduh. (Detail: {str(e)})")
