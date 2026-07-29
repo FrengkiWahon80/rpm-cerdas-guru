@@ -1,6 +1,6 @@
 # ============================================================
-# RPM CERDAS AI v2.2 OFFLINE (FORMAT TABEL WORD RAPI)
-# BAGIAN 1: CONFIG, IMPORTS, & LOGIKA TEKS PREVIEW ASLI
+# NAMA APLIKASI: RPM CERDAS AI v3.0 (EDISI KHUSUS PAK DANIEL)
+# SEKOLAH: SMPN TUJUH MARET HADAKEWA
 # ============================================================
 
 import io
@@ -11,149 +11,37 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-# Konfigurasi Halaman Utama Streamlit
+# --- CONFIG HALAMAN ---
 st.set_page_config(
-    page_title="RPM CERDAS AI",
-    page_icon="📘",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_title="RPM CERDAS AI - SMPN 7 MARET HADAKEWA",
+    page_icon="🧠",
+    layout="wide"
 )
 
-if "hasil" not in st.session_state:
-    st.session_state.hasil = ""
+# --- KONSTANTA: 8 DIMENSI KOMPETENSI LULUSAN (UPDATE RPM TERBARU) ---
+DIMENSI_LULUSAN = [
+    "1. Beriman, Bertakwa kepada Tuhan YME, dan Berakhlak Mulia",
+    "2. Berkebinekaan Global (Nasionalisme & Inklusivitas)",
+    "3. Mandiri (Self-Regulated Learning)",
+    "4. Bergotong Royong (Kolaborasi & Empati)",
+    "5. Bernalar Kritis (Analisis & Evaluasi)",
+    "6. Kreatif (Inovasi & Orisinalitas)",
+    "7. Literasi (Kemampuan Memahami Konteks Teks Kompleks)",
+    "8. Numerasi (Kemampuan Logika Matematika dalam Realitas)"
+]
 
-if "history" not in st.session_state:
-    st.session_state.history = []
+# --- LOGIKA AI: DEEP CONTENT ENHANCER ---
+def ai_brain_enhancer(topik, subtopik):
+    suggestions = {
+        "essential_question": f"Bagaimana prinsip {topik} dapat memprediksi atau menyelesaikan tantangan di masa depan terkait {subtopik}?",
+        "surface_tips": f"Fokus pada penguasaan konsep dasar {topik} dan pengenalan istilah kunci.",
+        "deep_tips": f"Bimbing siswa menghubungkan {topik} dengan kasus nyata di lingkungan Hadakewa.",
+        "transfer_tips": f"Tantang siswa menciptakan solusi unik menggunakan pemahaman {subtopik} mereka."
+    }
+    return suggestions
 
-# CSS Custom
-st.markdown("""
-<style>
-.main-title { font-size: 36px; font-weight: bold; color: #1565C0; }
-.sub-title { font-size: 16px; color: #555555; }
-textarea { font-size: 14px !important; }
-footer { visibility: hidden; }
-</style>
-""", unsafe_allow_html=True)
-
-# Header
-st.markdown('<div class="main-title">📘 RPM CERDAS AI</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">Generator RPM Kurikulum Merdeka (Edisi Format Tabel Word Rapi)</div>', unsafe_allow_html=True)
-st.divider()
-
-# Sidebar
-st.sidebar.title("📘 RPM CERDAS AI")
-menu = st.sidebar.selectbox("Pilih Menu", ["Generator RPM", "Tentang Aplikasi"])
-st.sidebar.divider()
-st.sidebar.success("Status: Server Offline Ready")
-
-if menu == "Tentang Aplikasi":
-    st.header("Tentang RPM CERDAS AI")
-    st.write("""
-    Aplikasi ini menyusun Rencana Pembelajaran Mendalam (RPM) lengkap dengan:
-    - Identitas & Identifikasi Pembelajaran
-    - Langkah-langkah (Pendahuluan, Inti, Penutup)
-    - Asesmen Diagnostik, Formatif, Sumatif
-    - LKPD & Rubrik Penilaian Detail
-    - **Ekspor Word Rapi:** Otomatis dikemas dalam tabel berpola profesional.
-    """)
-    st.stop()
-
-# Fungsi Pembuat Preview Teks Asli Anda
-def generate_rpm_document(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, karakteristik):
-    if not karakteristik.strip():
-        karakter = f"Peserta didik kelas {kelas} memiliki beragam gaya belajar (visual, auditori, kinestetik) serta tingkat kesiapan belajar yang bervariasi. Pembelajaran dirancang menggunakan diferensiasi proses dan konten."
-    else:
-        karakter = karakteristik
-
-    hasil = f"""============================================================
-RENCANA PEMBELAJARAN MENDALAM (RPM)
-============================================================
-
-A. IDENTITAS PEMBELAJARAN
-Nama Sekolah      : {sekolah}
-Nama Guru         : {guru}
-Mata Pelajaran    : {mapel}
-Kelas / Fase      : {kelas} / {fase}
-Semester          : {semester}
-Tahun Pelajaran   : {tahun}
-Alokasi Waktu     : {alokasi}
-
-============================================================
-B. IDENTIFIKASI PEMBELAJARAN
-Topik Utama       : {topik}
-Sub Topik         : {subtopik}
-Capaian (CP)      : {cp}
-
-============================================================
-C. KARAKTERISTIK PESERTA DIDIK
-{karakter}
-
-============================================================
-D. DIMENSI PROFIL LULUSAN
-• Beriman, Bertakwa kepada Tuhan YME, dan Berakhlak Mulia
-• Berkebinekaan Global
-• Bergotong Royong
-• Mandiri
-• Bernalar Kritis
-• Kreatif
-
-============================================================
-E. TUJUAN PEMBELAJARAN
-1. Melalui pengamatan dan diskusi, peserta didik mampu menjelaskan konsep dasar {topik} ({subtopik}) dengan tepat.
-2. Melalui eksplorasi masalah, peserta didik mampu menganalisis keterkaitan {topik} dengan kehidupan sehari-hari.
-3. Melalui penugasan kelompok pada LKPD, peserta didik mampu menyusun dan mempresentasikan solusi secara kolaboratif.
-4. Menunjukkan sikap bernalar kritis, gotong royong, dan tanggung jawab selama pembelajaran.
-
-============================================================
-F. LANGKAH-LANGKAH PEMBELAJARAN
-1. KEGIATAN PENDAHULUAN (15 Menit)
-• Salam, berdoa, dan presensi.
-• Apersepsi dan apersepsi materi {topik}.
-• Pertanyaan pemantik: "Bagaimana penerapan {topik} dalam kehidupan kita sehari-hari?"
-• Menyampaikan tujuan pembelajaran dan alur kegiatan.
-
-2. KEGIATAN INTI (50 Menit)
-• Orientasi Masalah: Pengamatan tayangan/studi kasus kontekstual terkait {topik}.
-• Pengorganisasian Kelompok: Pembagian kelompok heterogen dan pembagian LKPD.
-• Penyelidikan Mandiri/Kelompok: Eksplorasi materi, diskusi, dan pengumpulan data.
-• Penyajian Karya: Presentasi hasil diskusi kelompok di depan kelas.
-• Analisis & Evaluasi: Tanya jawab, penguatan konsep oleh guru, dan klarifikasi miskonsepsi.
-
-3. KEGIATAN PENUTUP (15 Menit)
-• Rangkuman dan kesimpulan bersama peserta didik.
-• Refleksi pembelajaran dan umpan balik.
-• Penugasan mandiri/informasi materi berikutnya, penutup doa dan salam.
-
-============================================================
-G. ASESMEN PEMBELAJARAN
-• Diagnostik : Tanya jawab / Pertanyaan Pemantik awal.
-• Formatif   : Observasi diskusi kelompok dan unjuk kerja LKPD.
-• Sumatif    : Tes tertulis / penilaian produk akhir.
-
-============================================================
-H. LEMBAR KERJA PESERTA DIDIK (LKPD)
-Mata Pelajaran : {mapel}
-Topik          : {topik} ({subtopik})
-
-TUGAS / PERTANYAAN DISKUSI:
-1. [Pemahaman Konsep] Jelaskan definisi serta prinsip dasar dari {topik}!
-2. [Analisis Kasus] Analisis 2 contoh penerapan {subtopik} di lingkungan sekitar!
-3. [Penyelesaian Masalah] Rekomendasikan solusi terhadap kendala penerapan {topik}!
-
-============================================================
-I. RUBRIK PENILAIAN
-1. Penilaian Sikap (Bernalar Kritis, Gotong Royong, Tanggung Jawab)
-2. Penilaian Pengetahuan (Kelengkapan & Ketepatan Jawaban LKPD)
-3. Penilaian Keterampilan (Penguasaan Materi & Penyampaian Presentasi)
-"""
-    return hasil
-# ============================================================
-# RPM CERDAS AI v2.2 OFFLINE (FORMAT TABEL WORD RAPI)
-# BAGIAN 2: ENGINE EKSPOR TABEL WORD & PENAMBAHAN FITUR TTD
-# ============================================================
-
+# --- FUNGSI EKSPOR WORD (TABEL PROFESIONAL) ---
 def set_cell_background(cell, fill_color):
-    """Memberi warna latar belakang pada sel tabel Word."""
     tc_pr = cell._element.get_or_add_tcPr()
     shd = OxmlElement('w:shd')
     shd.set(qn('w:val'), 'clear')
@@ -161,263 +49,175 @@ def set_cell_background(cell, fill_color):
     shd.set(qn('w:fill'), fill_color)
     tc_pr.append(shd)
 
-def add_header_row(table, headers, fill_color="1565C0"):
-    """Membuat baris header tabel dengan latar berwarna biru."""
+def add_header_row(table, headers):
     hdr_cells = table.rows[0].cells
     for i, title in enumerate(headers):
         hdr_cells[i].text = title
-        set_cell_background(hdr_cells[i], fill_color)
+        set_cell_background(hdr_cells[i], "1F4E78")
         p = hdr_cells[i].paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         for run in p.runs:
             run.font.bold = True
             run.font.color.rgb = RGBColor(255, 255, 255)
 
-def export_word(sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, karakteristik, nama_kepsek, nip_kepsek, nip_guru, tempat_tanggal):
+def export_word_rpm(data):
     doc = Document()
     
-    # Setting Margin Dokumen (Normal)
-    sections = doc.sections
-    for section in sections:
-        section.top_margin = Inches(1)
-        section.bottom_margin = Inches(1)
-        section.left_margin = Inches(1)
-        section.right_margin = Inches(1)
+    # Judul Dokumen
+    t = doc.add_heading(level=0)
+    run = t.add_run("RENCANA PEMBELAJARAN MENDALAM (RPM)")
+    run.font.size = Pt(18)
+    run.font.color.rgb = RGBColor(31, 78, 120)
+    t.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    # JUDUL UTAMA
-    title = doc.add_heading(level=0)
-    run_title = title.add_run("RENCANA PEMBELAJARAN MENDALAM (RPM)")
-    run_title.font.size = Pt(18)
-    run_title.font.bold = True
-    run_title.font.color.rgb = RGBColor(21, 101, 192)
-    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-    if not karakteristik.strip():
-        karakter = f"Peserta didik kelas {kelas} memiliki beragam gaya belajar (visual, auditori, kinestetik) serta tingkat kesiapan belajar yang bervariasi. Pembelajaran dirancang menggunakan diferensiasi proses dan konten."
-    else:
-        karakter = karakteristik
-
-    # --- 1. TABEL IDENTITAS & IDENTIFIKASI ---
-    doc.add_heading("I. IDENTITAS & IDENTIFIKASI PEMBELAJARAN", level=2)
-    table_id = doc.add_table(rows=10, cols=2)
-    table_id.style = "Table Grid"
-    
-    data_id = [
-        ("Nama Sekolah", sekolah),
-        ("Nama Guru", guru),
-        ("Mata Pelajaran", mapel),
-        ("Kelas / Fase / Sem", f"{kelas} / Fase {fase} / Semester {semester}"),
-        ("Tahun Pelajaran", tahun),
-        ("Alokasi Waktu", alokasi),
-        ("Topik Utama", topik),
-        ("Sub Topik", subtopik),
-        ("Capaian (CP)", cp),
-        ("Karakteristik Siswa", karakter)
+    # I. Identitas
+    doc.add_heading("I. IDENTITAS & KARAKTERISTIK", level=2)
+    tbl_id = doc.add_table(rows=8, cols=2)
+    tbl_id.style = "Table Grid"
+    rows_id = [
+        ("Nama Sekolah", data['sekolah']),
+        ("Nama Guru", data['guru']),
+        ("Mata Pelajaran", data['mapel']),
+        ("Kelas / Fase / Semester", f"{data['kelas']} / {data['fase']} / {data['semester']}"),
+        ("Topik Utama / Sub-Topik", f"{data['topik']} / {data['subtopik']}"),
+        ("Alokasi Waktu", data['alokasi']),
+        ("Capaian Pembelajaran", data['cp']),
+        ("Karakteristik Siswa", data['karakteristik'])
     ]
+    for i, (k, v) in enumerate(rows_id):
+        tbl_id.rows[i].cells[0].text = k
+        tbl_id.rows[i].cells[1].text = v
+        set_cell_background(tbl_id.rows[i].cells[0], "F2F2F2")
+        tbl_id.rows[i].cells[0].paragraphs[0].runs[0].font.bold = True
+
+    # II. Dimensi & Tujuan
+    doc.add_heading("II. KOMPETENSI & TUJUAN (DEEP LEARNING)", level=2)
+    tbl_dim = doc.add_table(rows=2, cols=2)
+    tbl_dim.style = "Table Grid"
+    add_header_row(tbl_dim, ["8 Dimensi Kompetensi Lulusan", "Tujuan Pembelajaran"])
     
-    for idx, (label, val) in enumerate(data_id):
-        row = table_id.rows[idx]
-        row.cells[0].text = label
-        row.cells[1].text = val
+    cell_dim = tbl_dim.rows[1].cells[0]
+    for d in DIMENSI_LULUSAN:
+        p = cell_dim.add_paragraph(d, style='List Bullet')
+        p.paragraph_format.space_after = Pt(0)
+    
+    cell_tujuan = tbl_dim.rows[1].cells[1]
+    for t_item in data['tujuan_list']:
+        if t_item.strip():
+            cell_tujuan.add_paragraph(t_item, style='List Number')
+
+    # III. Langkah SDT
+    doc.add_heading("III. ALUR PEMBELAJARAN MENDALAM (S-D-T)", level=2)
+    tbl_step = doc.add_table(rows=4, cols=3)
+    tbl_step.style = "Table Grid"
+    add_header_row(tbl_step, ["Tahapan", "Aktivitas Strategis (Penerapan AI/Mendalam)", "Alokasi"])
+    
+    steps = [
+        ("SURFACE (Pemerolehan)", data['surf'], "20%"),
+        ("DEEP (Pengolahan)", data['deep'], "60%"),
+        ("TRANSFER (Penerapan)", data['tran'], "20%")
+    ]
+    for i, (name, content, time) in enumerate(steps):
+        row = tbl_step.rows[i+1]
+        row.cells[0].text = name
+        row.cells[1].text = content
+        row.cells[2].text = time
         row.cells[0].paragraphs[0].runs[0].font.bold = True
-        set_cell_background(row.cells[0], "F2F2F2")
 
-    doc.add_paragraph()
+    # IV. Asesmen & Tanda Tangan
+    doc.add_heading("IV. EVALUASI & PENGESAHAN", level=2)
+    tbl_as = doc.add_table(rows=3, cols=2)
+    tbl_as.style = "Table Grid"
+    tbl_as.rows[0].cells[0].text = "Asesmen Diagnostik/Formatif"
+    tbl_as.rows[0].cells[1].text = data['asesmen_f']
+    tbl_as.rows[1].cells[0].text = "Asesmen Sumatif"
+    tbl_as.rows[1].cells[1].text = data['asesmen_s']
+    tbl_as.rows[2].cells[0].text = "Pertanyaan Pemantik AI"
+    tbl_as.rows[2].cells[1].text = data['ai_q']
 
-    # --- 2. TABEL PROFIL LULUSAN & TUJUAN ---
-    doc.add_heading("II. ORIENTASI PROFIL & TUJUAN", level=2)
-    table_goal = doc.add_table(rows=2, cols=2)
-    table_goal.style = "Table Grid"
-    add_header_row(table_goal, ["Dimensi Profil Lulusan", "Tujuan Pembelajaran"])
+    doc.add_paragraph("\n\n")
+    ttd_table = doc.add_table(rows=3, cols=2)
+    ttd_table.rows[0].cells[1].text = f"{data['tgl_doc']}"
+    ttd_table.rows[1].cells[0].text = "Mengetahui,\nKepala Sekolah"
+    ttd_table.rows[1].cells[1].text = "Guru Mata Pelajaran"
     
-    row_g = table_goal.rows[1]
-    p_dim = row_g.cells[0].paragraphs[0]
-    p_dim.add_run("• Beriman, Bertakwa kepada Tuhan YME, dan Berakhlak Mulia\n")
-    p_dim.add_run("• Berkebinekaan Global\n")
-    p_dim.add_run("• Bergotong Royong\n")
-    p_dim.add_run("• Mandiri\n")
-    p_dim.add_run("• Bernalar Kritis\n")
-    p_dim.add_run("• Kreatif")
+    p1 = ttd_table.rows[2].cells[0].paragraphs[0]
+    r1 = p1.add_run(f"\n\n{data['kepsek']}\nNIP. {data['nip_kepsek']}")
+    r1.font.bold = True
     
-    p_tujuan = row_g.cells[1].paragraphs[0]
-    p_tujuan.add_run(f"1. Melalui pengamatan dan diskusi, peserta didik mampu menjelaskan konsep dasar {topik} ({subtopik}) dengan tepat.\n")
-    p_tujuan.add_run(f"2. Melalui eksplorasi masalah, peserta didik mampu menganalisis keterkaitan {topik} dengan kehidupan sehari-hari.\n")
-    p_tujuan.add_run(f"3. Melalui penugasan kelompok pada LKPD, peserta didik mampu menyusun dan mempresentasikan solusi secara kolaboratif.\n")
-    p_tujuan.add_run("4. Menunjukkan sikap bernalar kritis, gotong royong, dan tanggung jawab selama pembelajaran.")
-
-    doc.add_paragraph()
-
-    # --- 3. TABEL LANGKAH PEMBELAJARAN ---
-    doc.add_heading("III. LANGKAH-LANGKAH PEMBELAJARAN", level=2)
-    table_steps = doc.add_table(rows=4, cols=3)
-    table_steps.style = "Table Grid"
-    add_header_row(table_steps, ["Tahap Kegiatan", "Durasi", "Detail Aktivitas"])
-    
-    # Pendahuluan
-    r_pend = table_steps.rows[1]
-    r_pend.cells[0].text = "Kegiatan Pendahuluan"
-    r_pend.cells[1].text = "15 Menit"
-    p_pend = r_pend.cells[2].paragraphs[0]
-    p_pend.add_run("• Salam, berdoa, dan presensi.\n")
-    p_pend.add_run(f"• Apersepsi dan apersepsi materi {topik}.\n")
-    p_pend.add_run(f"• Pertanyaan pemantik: \"Bagaimana penerapan {topik} dalam kehidupan kita sehari-hari?\"\n")
-    p_pend.add_run("• Menyampaikan tujuan pembelajaran dan alur kegiatan.")
-        
-    # Inti
-    r_inti = table_steps.rows[2]
-    r_inti.cells[0].text = "Kegiatan Inti"
-    r_inti.cells[1].text = "50 Menit"
-    p_inti = r_inti.cells[2].paragraphs[0]
-    p_inti.add_run(f"• Orientasi Masalah: Pengamatan tayangan/studi kasus kontekstual terkait {topik}.\n")
-    p_inti.add_run("• Pengorganisasian Kelompok: Pembagian kelompok heterogen dan pembagian LKPD.\n")
-    p_inti.add_run(f"• Penyelidikan Mandiri/Kelompok: Eksplorasi materi, diskusi, dan pengumpulan data.\n")
-    p_inti.add_run("• Penyajian Karya: Presentasi hasil diskusi kelompok di depan kelas.\n")
-    p_inti.add_run("• Analisis & Evaluasi: Tanya jawab, penguatan konsep oleh guru, dan klarifikasi miskonsepsi.")
-        
-    # Penutup
-    r_pen = table_steps.rows[3]
-    r_pen.cells[0].text = "Kegiatan Penutup"
-    r_pen.cells[1].text = "15 Menit"
-    p_pen = r_pen.cells[2].paragraphs[0]
-    p_pen.add_run("• Rangkuman dan kesimpulan bersama peserta didik.\n")
-    p_pen.add_run("• Refleksi pembelajaran dan umpan balik.\n")
-    p_pen.add_run("• Penugasan mandiri/informasi materi berikutnya, penutup doa dan salam.")
-
-    doc.add_paragraph()
-
-    # --- 4. TABEL ASESMEN, LKPD & RUBRIK ---
-    doc.add_heading("IV. ASESMEN, LKPD & RUBRIK PENILAIAN", level=2)
-    table_eval = doc.add_table(rows=4, cols=2)
-    table_eval.style = "Table Grid"
-    add_header_row(table_eval, ["Komponen", "Rancangan Dokumen"])
-    
-    # Baris Asesmen
-    r_as = table_eval.rows[1]
-    r_as.cells[0].text = "Asesmen Pembelajaran"
-    r_as.cells[0].paragraphs[0].runs[0].font.bold = True
-    r_as.cells[1].text = "• Diagnostik : Tanya jawab / Pertanyaan Pemantik awal.\n• Formatif   : Observasi diskusi kelompok dan unjuk kerja LKPD.\n• Sumatif    : Tes tertulis / penilaian produk akhir."
-    
-    # Baris LKPD
-    r_lk = table_eval.rows[2]
-    r_lk.cells[0].text = "Lembar Kerja Peserta Didik (LKPD)"
-    r_lk.cells[0].paragraphs[0].runs[0].font.bold = True
-    r_lk.cells[1].text = f"1. [Pemahaman Konsep] Jelaskan definisi serta prinsip dasar dari {topik}!\n2. [Analisis Kasus] Analisis 2 contoh penerapan {subtopik} di lingkungan sekitar!\n3. [Penyelesaian Masalah] Rekomendasikan solusi terhadap kendala penerapan {topik}!"
-        
-    # Baris Rubrik
-    r_rb = table_eval.rows[3]
-    r_rb.cells[0].text = "Rubrik Penilaian"
-    r_rb.cells[0].paragraphs[0].runs[0].font.bold = True
-    r_rb.cells[1].text = "1. Penilaian Sikap (Bernalar Kritis, Gotong Royong, Tanggung Jawab)\n2. Penilaian Pengetahuan (Kelengkapan & Ketepatan Jawaban LKPD)\n3. Penilaian Keterampilan (Penguasaan Materi & Penyampaian Presentasi)"
-
-    doc.add_paragraph()
-    doc.add_paragraph()
-
-    # --- 5. LAMPIRAN TANDA TANGAN (KODE AMAN PRESTISIUS TANPA ERROR TUPLE) ---
-    table_ttd = doc.add_table(rows=3, cols=2)
-    
-    for row in table_ttd.rows:
-        for cell in row.cells:
-            tcPr = cell._element.get_or_add_tcPr()
-            tcBorders = OxmlElement('w:tcBorders')
-            for b_name in ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']:
-                b = OxmlElement(f'w:{b_name}')
-                b.set(qn('w:val'), 'none')
-                tcBorders.append(b)
-            tcPr.append(tcBorders)
-
-    table_ttd.rows[0].cells[1].text = f"{tempat_tanggal}\n"
-    table_ttd.rows[1].cells[0].text = "Mengetahui,\nKepala Sekolah\n\n\n\n"
-    table_ttd.rows[1].cells[1].text = "Guru Mata Pelajaran\n\n\n\n"
-
-    p_nkep = table_ttd.rows[2].cells[0].paragraphs[0]
-    run_nkep = p_nkep.add_run(nama_kepsek)
-    run_nkep.font.underline = True
-    run_nkep.font.bold = True
-    p_nkep.add_run(f"\nNIP. {nip_kepsek if nip_kepsek else '-'}")
-
-    p_nguru = table_ttd.rows[2].cells[1].paragraphs[0]
-    run_nguru = p_nguru.add_run(guru)
-    run_nguru.font.underline = True
-    run_nguru.font.bold = True
-    p_nguru.add_run(f"\nNIP. {nip_guru if nip_guru else '-'}")
+    p2 = ttd_table.rows[2].cells[1].paragraphs[0]
+    r2 = p2.add_run(f"\n\n{data['guru']}\nNIP. {data['nip_guru']}")
+    r2.font.bold = True
 
     bio = io.BytesIO()
     doc.save(bio)
     bio.seek(0)
     return bio
-# ============================================================
-# RPM CERDAS AI v2.2 OFFLINE (FORMAT TABEL WORD RAPI)
-# BAGIAN 3: USER INTERFACE (TABS) & STATE MANAJEMEN DOWNLOAD
-# ============================================================
 
-st.header("⚙️ Form Parameter & Input Rencana Pembelajaran")
-st.write("Silakan isi data identitas pokok, topik, dan kelengkapan penandatanganan dokumen di bawah ini:")
-
-# Pembagian Form Input Menggunakan Sistem Tab Sederhana Berdampingan
-tab_utama, tab_tanda_tangan = st.tabs(["📝 Identitas Pembelajaran", "✍️ Lembar Pengesahan TTD"])
-
-with tab_utama:
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        sekolah = st.text_input("Nama Sekolah", value="SMA Negeri 1 Pembelajaran")
-        guru = st.text_input("Nama Guru", value="Ahmad Sucipto, S.Pd.")
-        tahun = st.text_input("Tahun Pelajaran", value="2026/2027")
-
-    with col2:
-        mapel = st.text_input("Mata Pelajaran", value="Informatika / Sains Terpadu")
-        kelas = st.text_input("Kelas / Rombel", value="X-A")
-        fase = st.text_input("Fase", value="E")
-
-    with col3:
-        semester = st.selectbox("Semester", ["1 (Ganjil)", "2 (Genap)"])
-        alokasi = st.text_input("Alokasi Waktu", value="2 JP x 45 Menit")
-
-    st.divider()
-
-    topik = st.text_input("Topik Utama *", value="Kecerdasan Buatan (AI)")
-    subtopik = st.text_input("Sub Topik *", value="Penerapan LLM dalam Pendidikan")
-    cp = st.text_area("Capaian Pembelajaran (CP)", value="Peserta didik mampu memahami perkembangan teknologi terkini, menganalisis dampak pemanfaatan tools AI secara bijak, dan merancang solusi penyelesaian masalah sehari-hari menggunakan konsep komputasi modern.")
-    karakteristik = st.text_area("Karakteristik Siswa (Opsional - Biarkan kosong agar diisi otomatis oleh template)", value="")
-
-with tab_tanda_tangan:
-    st.write("Sesuaikan teks administratif penandatanganan lembar terbawah perangkat pembelajaran:")
-    col_adm1, col_adm2 = st.columns(2)
-    
-    with col_adm1:
-        tempat_tanggal = st.text_input("Tempat, Tanggal Dokumen", value="Jakarta, 17 Juli 2026")
-        nama_kepsek = st.text_input("Nama Kepala Sekolah", value="Dr. H. Supriadi, M.Pd.")
-        nip_kepsek = st.text_input("NIP Kepala Sekolah", value="19750824 200003 1 002")
-        
-    with col_adm2:
-        st.write("") 
-        st.write("") 
-        nip_guru = st.text_input("NIP Guru Mata Pelajaran", value="19891210 201504 2 003")
-
+# --- INTERFACE UTAMA (BROWSER) ---
+st.markdown("<h1 style='text-align: center; color: #1F4E78;'>🧠 RPM CERDAS AI</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-weight: bold;'>SMPN TUJUH MARET HADAKEWA</p>", unsafe_allow_html=True)
 st.divider()
 
-# Tombol Eksekusi Pembuatan Dokumen
-if st.button("🚀 Susun Rencana Pembelajaran Mendalam (AI)", type="primary"):
-    if not topik.strip() or not subtopik.strip():
-        st.error("Gagal! Kolom Topik Utama dan Sub Topik wajib diisi.")
-    else:
-        with st.spinner("Template sedang menyelaraskan seluruh parameter identitas..."):
-            # Pembuatan Teks Preview
-            st.session_state.hasil = generate_rpm_document(
-                sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, karakteristik
-            )
-            # Pembuatan File Binary .docx via fungsi ekspor tabel dengan Tanda Tangan
-            st.session_state.word_file = export_word(
-                sekolah, guru, mapel, kelas, semester, fase, tahun, alokasi, topik, subtopik, cp, karakteristik, nama_kepsek, nip_kepsek, nip_guru, tempat_tanggal
-            )
-            st.success("Selesai! RPM Berhasil dihasilkan.")
+# Sidebar - Isian Otomatis Pak Daniel
+with st.sidebar:
+    st.header("📋 Administrasi")
+    sekolah = st.text_input("Nama Sekolah", "SMPN Tujuh Maret Hadakewa")
+    guru = st.text_input("Nama Guru", "Daniel F. L. Wahon, S.S") # Nama Default Anda
+    nip_guru = st.text_input("NIP Guru", "Masukkan NIP Di Sini")
+    st.divider()
+    kepsek = st.text_input("Kepala Sekolah", "Nama Kepala Sekolah")
+    nip_kepsek = st.text_input("NIP Kepsek", "NIP Kepala Sekolah")
+    tgl_doc = st.text_input("Tempat, Tanggal", "Hadakewa, 17 Juli 2024")
 
-# Menampilkan Hasil Preview dan Tombol Unduh Dokumen
-if st.session_state.hasil:
-    st.header("📄 Pratinjau Dokumen Hasil")
-    st.text_area("Preview Output Teks", value=st.session_state.hasil, height=450)
+# Input Konten Pembelajaran
+col1, col2 = st.columns(2)
+with col1:
+    mapel = st.text_input("Mata Pelajaran", "Bahasa Inggris / Informatika")
+    kelas = st.text_input("Kelas / Fase", "VII / D")
+    semester = st.selectbox("Semester", ["1 (Ganjil)", "2 (Genap)"])
+    alokasi = st.text_input("Alokasi Waktu", "2 JP x 40 Menit")
+with col2:
+    topik = st.text_input("Topik Utama", "Narrative Text")
+    subtopik = st.text_input("Sub-Topik", "Legenda Lokal Nusa Tenggara Timur")
+    cp = st.text_area("Capaian Pembelajaran (CP)", "Peserta didik mampu memahami konteks literasi dan menghasilkan teks kreatif secara mandiri.")
+
+# Rekomendasi AI
+ai_res = ai_brain_enhancer(topik, subtopik)
+
+st.subheader("🚀 Strategi Pembelajaran Mendalam (Deep Learning)")
+tab1, tab2, tab3 = st.tabs(["Alur SDT", "Tujuan & Dimensi", "Asesmen & AI Thinking"])
+
+with tab1:
+    c1, c2, c3 = st.columns(3)
+    surf = c1.text_area("Surface (Pemerolehan Fakta)", f"• {ai_res['surface_tips']}\n• Brainstorming kosa kata baru.\n• Menyimak materi awal.")
+    deep = c2.text_area("Deep (Pengolahan Makna)", f"• {ai_res['deep_tips']}\n• Diskusi kelompok menganalisis nilai moral.\n• Membandingkan berbagai versi teks.")
+    tran = c3.text_area("Transfer (Penerapan Solusi)", f"• {ai_res['transfer_tips']}\n• Menulis ulang cerita dalam konteks modern.")
+
+with tab2:
+    st.info("Sesuai Standar Lulusan terbaru, dokumen mencakup Literasi & Numerasi.")
+    tujuan = st.text_area("Tujuan Pembelajaran", 
+                         f"Siswa mampu mengidentifikasi struktur {topik}.\nSiswa dapat mengevaluasi pesan moral dalam {subtopik}.\nSiswa mahir mempresentasikan karya secara kolaboratif.")
+
+with tab3:
+    as_f = st.text_input("Asesmen Formatif", "Diskusi & Umpan Balik Teman Sejawat")
+    as_s = st.text_input("Asesmen Sumatif", "Proyek Menulis Kreatif")
+    st.success(f"**AI Thinking (Pertanyaan Pemantik):** {ai_res['essential_question']}")
+
+# Tombol Download
+if st.button("📝 Susun & Unduh RPM Sekarang", type="primary"):
+    payload = {
+        "sekolah": sekolah, "guru": guru, "nip_guru": nip_guru, "mapel": mapel,
+        "kelas": kelas, "fase": "D", "semester": semester, "topik": topik,
+        "subtopik": subtopik, "alokasi": alokasi, "cp": cp,
+        "karakteristik": "Beragam Profil Literasi (Diferensiasi Proses)", "tujuan_list": tujuan.split('\n'),
+        "surf": surf, "deep": deep, "tran": tran, "asesmen_f": as_f, "asesmen_s": as_s,
+        "kepsek": kepsek, "nip_kepsek": nip_kepsek, "tgl_doc": tgl_doc, "ai_q": ai_res['essential_question']
+    }
     
+    final_docx = export_word_rpm(payload)
     st.download_button(
-        label="📥 Unduh Dokumen RPM (Format Tabel Word .docx)",
-        data=st.session_state.word_file,
-        file_name=f"RPM_Mendalam_{topik.replace(' ', '_')}.docx",
-        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        label="📥 Klik Untuk Unduh RPM (.docx)", 
+        data=final_docx, 
+        file_name=f"RPM_Mendalam_SMPN7_{topik.replace(' ', '_')}.docx"
     )
