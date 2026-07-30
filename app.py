@@ -1,9 +1,3 @@
-# ============================================================
-# NAMA APLIKASI: RPM CERDAS AI v3.1 (EDISI PENYEMPURNAAN)
-# PENYUSUN: Daniel F. L. Wahon, S.S
-# SEKOLAH: SMPN TUJUH MARET HADAKEWA
-# ============================================================
-
 import io
 import streamlit as st
 from docx import Document
@@ -15,21 +9,50 @@ from docx.oxml.ns import qn
 # --- CONFIG HALAMAN ---
 st.set_page_config(page_title="RPM CERDAS AI - SMPN 7 MARET", page_icon="🧠", layout="wide")
 
-# --- KONSTANTA: 8 DIMENSI KOMPETENSI LULUSAN ---
+# --- KONSTANTA ---
 DIMENSI_LULUSAN = [
     "1. Beriman, Bertakwa kepada Tuhan YME, dan Berakhlak Mulia",
     "2. Berkebinekaan Global", "3. Mandiri", "4. Bergotong Royong",
     "5. Bernalar Kritis", "6. Kreatif", "7. Literasi", "8. Numerasi"
 ]
 
-# --- LOGIKA AI: ASESMEN & RUBRIK ENHANCER ---
-def ai_assessment_logic(topik):
+# --- LOGIKA AI: PENYEMPURNAAN KONTEN ---
+def generate_detailed_steps(topik, subtopik):
     return {
-        "diagnostik": f"Kuis cepat/tanya jawab lisan mengenai pengetahuan awal siswa tentang {topik}.",
-        "formatif": f"Observasi diskusi kelompok, ceklis keaktifan, dan penilaian antar teman saat proses pengolahan makna.",
-        "sumatif": f"Penilaian produk akhir (proyek/laporan) atau tes tertulis uraian yang menguji daya nalar.",
-        "rubrik": f"Kriteria: 1. Kedalaman analisis (40%), 2. Orisinalitas ide (30%), 3. Kualitas presentasi/produk (30%).",
-        "pemantik": f"Jika konsep {topik} ini tidak pernah ditemukan, bagaimana cara manusia memecahkan masalah tersebut secara manual?"
+        "pendahuluan": (
+            f"1. Guru menyapa siswa dan melakukan doa bersama.\n"
+            f"2. Apersepsi: Guru mengaitkan {topik} dengan pengalaman nyata siswa.\n"
+            f"3. Guru menyampaikan tujuan pembelajaran dan manfaat mempelajari {subtopik}.\n"
+            f"4. Diagnostik singkat: Menanyakan satu pertanyaan pemantik untuk cek kesiapan."
+        ),
+        "surface": (
+            f"• Literasi Dasar: Siswa membaca/menonton materi tentang {topik}.\n"
+            f"• Penemuan Konsep: Siswa mengidentifikasi kosakata kunci dan struktur dasar {subtopik}.\n"
+            f"• Modeling: Guru memberikan contoh konkret dan menjelaskan 'apa' dan 'bagaimana' konsep tersebut."
+        ),
+        "deep": (
+            f"• Investigasi: Siswa bekerja kelompok menganalisis hubungan antar unsur dalam {subtopik}.\n"
+            f"• Diskusi Kritis: Debat atau diskusi mendalam mengenai 'mengapa' dan 'bagaimana jika' terkait {topik}.\n"
+            f"• Feedback: Guru memberikan penguatan pada miskonsepsi yang muncul saat diskusi."
+        ),
+        "transfer": (
+            f"• Proyek Kreatif: Siswa membuat karya original (tulisan/produk) berbasis {topik}.\n"
+            f"• Kontekstualisasi: Siswa menerapkan solusi dari {subtopik} untuk masalah di lingkungan sekolah/rumah.\n"
+            f"• Presentasi: Siswa menyajikan hasil karyanya untuk mendapatkan umpan balik dari rekan sejawat."
+        ),
+        "penutup": (
+            f"1. Refleksi: Siswa menuliskan 'Satu hal baru yang saya pelajari hari ini'.\n"
+            f"2. Simpulan: Guru dan siswa merangkum poin-poin utama pembelajaran.\n"
+            f"3. Evaluasi: Penjelasan singkat mengenai tugas mandiri atau materi pertemuan berikutnya.\n"
+            f"4. Doa dan salam penutup."
+        ),
+        "rubrik": (
+            "Kriteria Penilaian (Skala 1-4):\n"
+            "1. Pemahaman Konsep: (1: Kurang, 2: Cukup, 3: Baik, 4: Sangat Baik)\n"
+            "2. Analisis Kritis: Kemampuan menghubungkan ide-ide dalam diskusi.\n"
+            "3. Kreativitas/Transfer: Orisinalitas dalam produk akhir.\n"
+            "4. Kolaborasi: Keaktifan dalam kerja kelompok."
+        )
     }
 
 # --- FUNGSI EKSPOR WORD ---
@@ -54,6 +77,8 @@ def add_header_row(table, headers):
 
 def export_word_rpm(data):
     doc = Document()
+    
+    # Judul
     t = doc.add_heading(level=0)
     run = t.add_run("RENCANA PEMBELAJARAN MENDALAM (RPM)")
     run.font.size = Pt(18)
@@ -66,34 +91,28 @@ def export_word_rpm(data):
     tbl_id.style = "Table Grid"
     rows_id = [
         ("Nama Sekolah", data['sekolah']), ("Nama Guru", data['guru']),
-        ("Mata Pelajaran", data['mapel']), ("Kelas / Fase / Semester", f"{data['kelas']} / {data['fase']} / {data['semester']}"),
-        ("Topik / Sub-Topik", f"{data['topik']} / {data['subtopik']}"), ("Alokasi Waktu", f"{data['total_menit']} Menit"),
+        ("Mata Pelajaran", data['mapel']), ("Kelas / Fase", f"{data['kelas']} / {data['fase']}"),
+        ("Topik Utama", data['topik']), ("Alokasi Waktu", f"{data['total_menit']} Menit"),
         ("Capaian Pembelajaran", data['cp']), ("Karakteristik Siswa", data['karakteristik'])
     ]
     for i, (k, v) in enumerate(rows_id):
         tbl_id.rows[i].cells[0].text = k
         tbl_id.rows[i].cells[1].text = str(v)
         set_cell_background(tbl_id.rows[i].cells[0], "F2F2F2")
-        tbl_id.rows[i].cells[0].paragraphs[0].runs[0].font.bold = True
 
-    # II. 8 Dimensi & Tujuan
-    doc.add_heading("II. KOMPETENSI & TUJUAN", level=2)
-    tbl_dim = doc.add_table(rows=2, cols=2)
-    tbl_dim.style = "Table Grid"
-    add_header_row(tbl_dim, ["8 Dimensi Kompetensi Lulusan", "Tujuan Pembelajaran"])
-    cell_dim = tbl_dim.rows[1].cells[0]
-    for d in DIMENSI_LULUSAN:
-        p = cell_dim.add_paragraph(d, style='List Bullet')
-        p.paragraph_format.space_after = Pt(0)
-    cell_tujuan = tbl_dim.rows[1].cells[1]
-    for t_item in data['tujuan_list']:
-        if t_item.strip(): cell_tujuan.add_paragraph(t_item, style='List Number')
+    # II. Alur Pembelajaran (Langkah Rinci)
+    doc.add_heading("II. LANGKAH-LANGKAH PEMBELAJARAN (METODE SDT)", level=2)
+    
+    # Pendahuluan
+    doc.add_heading("A. PENDAHULUAN", level=3)
+    doc.add_paragraph(data['pendahuluan'])
 
-    # III. Langkah SDT (Waktu dalam MENIT)
-    doc.add_heading("III. ALUR PEMBELAJARAN (SURFACE - DEEP - TRANSFER)", level=2)
+    # Inti (Tabel)
+    doc.add_heading("B. KEGIATAN INTI (Surface - Deep - Transfer)", level=3)
     tbl_step = doc.add_table(rows=4, cols=3)
     tbl_step.style = "Table Grid"
-    add_header_row(tbl_step, ["Tahapan", "Aktivitas Strategis", "Durasi"])
+    add_header_row(tbl_step, ["Tahapan", "Aktivitas Strategis (Guru & Siswa)", "Durasi"])
+    
     steps = [
         ("SURFACE (Pemerolehan)", data['surf'], f"{data['m_surf']} Menit"),
         ("DEEP (Pengolahan)", data['deep'], f"{data['m_deep']} Menit"),
@@ -104,17 +123,19 @@ def export_word_rpm(data):
         row.cells[0].text = name
         row.cells[1].text = content
         row.cells[2].text = time
-        row.cells[2].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-    # IV. Asesmen Detail & Rubrik
-    doc.add_heading("IV. RANCANGAN ASESMEN & RUBRIK", level=2)
-    tbl_as = doc.add_table(rows=5, cols=2)
+    # Penutup
+    doc.add_heading("C. PENUTUP", level=3)
+    doc.add_paragraph(data['penutup'])
+
+    # III. Asesmen & Rubrik
+    doc.add_heading("III. ASESMEN & RUBRIK PENILAIAN", level=2)
+    tbl_as = doc.add_table(rows=4, cols=2)
     tbl_as.style = "Table Grid"
     as_rows = [
-        ("Asesmen Diagnostik", data['as_d']),
-        ("Asesmen Formatif (Proses)", data['as_f']),
-        ("Asesmen Sumatif (Hasil)", data['as_s']),
-        ("Kriteria/Rubrik Penilaian", data['as_r']),
+        ("Asesmen Formatif", data['as_f']),
+        ("Asesmen Sumatif", data['as_s']),
+        ("Rubrik Penilaian", data['as_r']),
         ("Pertanyaan Pemantik AI", data['ai_q'])
     ]
     for i, (k, v) in enumerate(as_rows):
@@ -125,11 +146,10 @@ def export_word_rpm(data):
     # Tanda Tangan
     doc.add_paragraph("\n")
     ttd_table = doc.add_table(rows=3, cols=2)
-    ttd_table.rows[0].cells[1].text = f"{data['tgl_doc']}"
     ttd_table.rows[1].cells[0].text = "Mengetahui,\nKepala Sekolah"
-    ttd_table.rows[1].cells[1].text = "Guru Mata Pelajaran"
-    ttd_table.rows[2].cells[0].paragraphs[0].add_run(f"\n\n{data['kepsek']}\nNIP. {data['nip_kepsek']}").font.bold = True
-    ttd_table.rows[2].cells[1].paragraphs[0].add_run(f"\n\n{data['guru']}\nNIP. {data['nip_guru']}").font.bold = True
+    ttd_table.rows[1].cells[1].text = f"{data['tgl_doc']}\nGuru Mata Pelajaran"
+    ttd_table.rows[2].cells[0].paragraphs[0].add_run(f"\n\n{data['kepsek']}").font.bold = True
+    ttd_table.rows[2].cells[1].paragraphs[0].add_run(f"\n\n{data['guru']}").font.bold = True
 
     bio = io.BytesIO()
     doc.save(bio)
@@ -137,68 +157,65 @@ def export_word_rpm(data):
     return bio
 
 # --- INTERFACE UTAMA ---
-st.markdown("<h2 style='text-align: center; color: #1F4E78;'>🧠 RPM CERDAS AI v3.1</h2>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'><b>Daniel F. L. Wahon, S.S</b> | SMPN TUJUH MARET HADAKEWA</p>", unsafe_allow_html=True)
-st.divider()
+st.title("🧠 RPM CERDAS AI v3.1")
+st.caption("Penyempurnaan Langkah Pembelajaran & Rubrik Penilaian")
 
 with st.sidebar:
     st.header("📋 Administrasi")
     sekolah = st.text_input("Sekolah", "SMPN Tujuh Maret Hadakewa")
     guru = st.text_input("Guru", "Daniel F. L. Wahon, S.S")
-    nip_guru = st.text_input("NIP Guru", "19...")
     kepsek = st.text_input("Kepala Sekolah", "Nama Kepala Sekolah")
-    nip_kepsek = st.text_input("NIP Kepsek", "19...")
     tgl_doc = st.text_input("Tempat, Tanggal", "Hadakewa, 17 Juli 2024")
-    st.divider()
-    total_menit = st.number_input("Total Durasi Pembelajaran (Menit)", min_value=1, value=80)
+    total_menit = st.number_input("Total Durasi (Menit)", value=80)
 
-# Kalkulasi Menit Otomatis (20% - 60% - 20%)
-m_surf = int(total_menit * 0.2)
-m_deep = int(total_menit * 0.6)
+# Kalkulasi Waktu Otomatis
+m_surf = int(total_menit * 0.25)
+m_deep = int(total_menit * 0.55)
 m_tran = total_menit - (m_surf + m_deep)
 
 col1, col2 = st.columns(2)
 with col1:
     mapel = st.text_input("Mata Pelajaran", "Bahasa Inggris")
-    kelas = st.text_input("Kelas / Fase", "VII / D")
     topik = st.text_input("Topik Utama", "Narrative Text")
 with col2:
-    semester = st.selectbox("Semester", ["1 (Ganjil)", "2 (Genap)"])
+    kelas = st.text_input("Kelas / Fase", "VII / D")
     subtopik = st.text_input("Sub-Topik", "Legenda Rakyat NTT")
-    cp = st.text_area("Capaian Pembelajaran (CP)", "Peserta didik memahami konteks literasi dan memproduksi teks kreatif.")
 
-ai_as = ai_assessment_logic(topik)
+# Generate Konten Default dari AI
+ai_content = generate_detailed_steps(topik, subtopik)
 
-st.subheader("🚀 Strategi & Asesmen Mendalam")
-tab1, tab2, tab3 = st.tabs(["Langkah Pembelajaran (Menit)", "Asesmen Lengkap", "Tujuan & Rubrik"])
+st.divider()
+st.subheader("📝 Detail Rencana Pembelajaran")
+
+tab1, tab2, tab3 = st.tabs(["Langkah Pembelajaran", "Asesmen & Rubrik", "CP & Karakteristik"])
 
 with tab1:
-    st.caption(f"Distribusi Waktu Otomatis: Surface {m_surf}m, Deep {m_deep}m, Transfer {m_tran}m")
+    pend = st.text_area("1. Pendahuluan (Opening)", ai_content['pendahuluan'], height=120)
+    st.markdown("**2. Kegiatan Inti (SDT Framework)**")
     c1, c2, c3 = st.columns(3)
-    surf = c1.text_area("Surface Activity", f"• Penjelasan konsep dasar {topik}.\n• Menyimak kosakata baru.", height=150)
-    deep = c2.text_area("Deep Activity", f"• Analisis unsur intrinsik {subtopik}.\n• Diskusi kelompok makna tersirat.", height=150)
-    tran = c3.text_area("Transfer Activity", f"• Menulis ulang/menceritakan kembali cerita dalam konteks saat ini.", height=150)
+    surf = c1.text_area(f"Surface ({m_surf}m)", ai_content['surface'], height=200)
+    deep = c2.text_area(f"Deep ({m_deep}m)", ai_content['deep'], height=200)
+    tran = c3.text_area(f"Transfer ({m_tran}m)", ai_content['transfer'], height=200)
+    penu = st.text_area("3. Penutup (Closing)", ai_content['penutup'], height=120)
 
 with tab2:
-    as_d = st.text_area("Asesmen Diagnostik", ai_as['diagnostik'])
-    as_f = st.text_area("Asesmen Formatif (Proses)", ai_as['formatif'])
-    as_s = st.text_area("Asesmen Sumatif (Hasil Akhir)", ai_as['sumatif'])
+    as_f = st.text_area("Asesmen Formatif (Proses)", "Observasi diskusi kelompok dan ceklis pemahaman konsep.")
+    as_s = st.text_area("Asesmen Sumatif (Hasil)", "Produk narasi kreatif atau tes uraian analisis teks.")
+    as_r = st.text_area("Rubrik Penilaian Terperinci", ai_content['rubrik'], height=150)
+    ai_q = st.text_input("Pertanyaan Pemantik AI", f"Mengapa sebuah legenda tetap diceritakan meskipun sudah berumur ratusan tahun?")
 
 with tab3:
-    tujuan = st.text_area("Tujuan Pembelajaran", f"Siswa dapat menganalisis {topik}.\nSiswa terampil menyusun {subtopik}.")
-    as_r = st.text_area("Rubrik Penilaian (Kriteria)", ai_as['rubrik'])
-    st.info(f"**AI Prompt (Pertanyaan Pemantik):** {ai_as['pemantik']}")
+    cp = st.text_area("Capaian Pembelajaran (CP)", "Peserta didik mampu memahami, mengolah, dan menyajikan teks naratif secara kritis dan kreatif.")
+    karakter = st.text_input("Karakteristik Siswa", "Heterogen dengan minat literasi visual dan auditori.")
 
 if st.button("📝 Susun & Unduh Dokumen RPM", type="primary"):
     payload = {
-        "sekolah": sekolah, "guru": guru, "nip_guru": nip_guru, "mapel": mapel,
-        "kelas": kelas, "fase": "D", "semester": semester, "topik": topik,
-        "subtopik": subtopik, "total_menit": total_menit, "cp": cp,
-        "karakteristik": "Diferensiasi Minat", "tujuan_list": tujuan.split('\n'),
-        "surf": surf, "deep": deep, "tran": tran,
-        "m_surf": m_surf, "m_deep": m_deep, "m_tran": m_tran,
-        "as_d": as_d, "as_f": as_f, "as_s": as_s, "as_r": as_r,
-        "kepsek": kepsek, "nip_kepsek": nip_kepsek, "tgl_doc": tgl_doc, "ai_q": ai_as['pemantik']
+        "sekolah": sekolah, "guru": guru, "mapel": mapel, "kelas": kelas, "fase": "D",
+        "topik": topik, "subtopik": subtopik, "total_menit": total_menit, "cp": cp,
+        "karakteristik": karakter, "pendahuluan": pend, "surf": surf, "deep": deep, 
+        "tran": tran, "penutup": penu, "m_surf": m_surf, "m_deep": m_deep, "m_tran": m_tran,
+        "as_f": as_f, "as_s": as_s, "as_r": as_r, "ai_q": ai_q,
+        "kepsek": kepsek, "tgl_doc": tgl_doc
     }
     final_file = export_word_rpm(payload)
-    st.download_button(label="📥 Unduh RPM (.docx)", data=final_file, file_name=f"RPM_Mendalam_{topik}.docx")
+    st.download_button(label="📥 Unduh RPM (.docx)", data=final_file, file_name=f"RPM_{topik}.docx")
